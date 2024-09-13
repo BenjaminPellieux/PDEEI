@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Paramètres physiques
-L = 1  # Longueur du mur (m)
+L = 0.1  # Longueur du mur (m)
 k = 1.5  # Conductivité thermique du béton (W/m·K)
-T_left = 100  # Température à la frontière gauche (°C) - Condition de Dirichlet
+T_left = 15  # Température à la frontière gauche (°C) - Condition de Dirichlet
 T_right = 20  # Température à la frontière droite (°C) - Condition de Dirichlet
 N = 1000  # Nombre de volumes finis
 dx = L / N  # Taille des volumes finis
