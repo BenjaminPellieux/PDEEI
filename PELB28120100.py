@@ -3,65 +3,65 @@ import matplotlib.pyplot as plt
 
 # https://fr.wikipedia.org/wiki/Liste_de_conductivit%C3%A9s_thermiques
 # Paramètres physiques
-L = 1  # Longueur du mur (m)
-k = 0.8  # Conductivité thermique du béton (W/m·K)
-T_left = 100  # Température à la frontière gauche (°C) - Dirichlet
-T_right_Dirichlet = 25  # Température à la frontière droite (°C) - Dirichlet
-q_right_Neumann = 19.85  # Flux thermique à la frontière droite (W/m^2) - Neumann
-N = 1000  # Nombre de volumes finis
-dx = L / N  # Taille des volumes finis
+L: int = 1  # Dimension = du mur (m)
+l: int = 1
+h: int = 1
 
-# Fonction pour résoudre le problème avec conditions de Dirichlet aux deux extrémités
-def solve_dirichlet():
-    # Construction de la matrice du système
-    A = np.zeros((N, N))
-    b = np.zeros(N)
+k: float = 0.8  # Conductivité thermique du béton (W/m·K)
+T_left: int = 100  # Température à la frontière gauche (°C) - Dirichlet
+T_right_Dirichlet: int = 25  # Température à la frontière droite (°C) - Dirichlet
+N: int = 1000  # Nombre de volumes finis
+dx: float = L / N  # Taille des volumes finis
+s: int = h * l 
 
-    # Remplir la matrice A pour la conduction thermique
+def init_matrix() -> [np.ndarray, np.ndarray]: 
+
+    """ Construction de la matrice du système """
+
+    A, B = np.zeros((N, N)), np.zeros(N)
+
     for i in range(1, N-1):
-        A[i, i-1] = k / dx**2
-        A[i, i] = -2 * k / dx**2
-        A[i, i+1] = k / dx**2
+        A[i, i-1] = (k * s) / dx**2
+        A[i, i] = (-2 * k * s) / dx**2
+        A[i, i+1] = (k * s) / dx**2
+    
+    # Condition de Dirichlet à gauche
+    A[0, 0] = 1
+    B[0] = T_left
 
-    # Conditions aux limites de Dirichlet
-    A[0, 0] = 1  # Condition de Dirichlet à gauche
-    b[0] = T_left
+    return A, B
+
+def solve_dirichlet() -> np.ndarray:
+    
+    """ Fonction pour résoudre le problème avec conditions 
+    de Dirichlet aux deux extrémités"""
+    A, b = init_matrix()
 
     A[-1, -1] = 1  # Condition de Dirichlet à droite
     b[-1] = T_right_Dirichlet
 
     # Résoudre le système linéaire Ax = b
-    T = np.linalg.solve(A, b)
+    T: np.ndarray = np.linalg.solve(A, b)
     return T
 
-# Fonction pour résoudre le problème avec condition de Dirichlet à gauche et Neumann à droite
-def solve_dirichlet_neumann():
-    # Construction de la matrice du système
-    A = np.zeros((N, N))
-    b = np.zeros(N)
+def solve_dirichlet_neumann() -> np.ndarray:
 
-    # Remplir la matrice A pour la conduction thermique
-    for i in range(1, N-1):
-        A[i, i-1] = k / dx**2
-        A[i, i] = -2 * k / dx**2
-        A[i, i+1] = k / dx**2
-
-    # Condition de Dirichlet à gauche
-    A[0, 0] = 1
-    b[0] = T_left
+    """ Fonction pour résoudre le problème avec condition 
+    de Dirichlet à gauche et Neumann à droite """
+    A, b  = init_matrix()
 
     # Condition de Neumann à droite
     A[-1, -1] = -k / dx
     A[-1, -2] = k / dx
-    b[-1] = q_right_Neumann
+    b[-1] = 0
 
     # Résoudre le système linéaire Ax = b
-    T = np.linalg.solve(A, b)
+    T: np.ndarray = np.linalg.solve(A, b)
     return T
 
 # Résolution des deux scénarios
-T_dirichlet = solve_dirichlet()
-T_dirichlet_neumann = solve_dirichlet_neumann()
+T_dirichlet: np.ndarray = solve_dirichlet()
+T_dirichlet_neumann: np.ndarray = solve_dirichlet_neumann()
 
 # Affichage des résultats
 x = np.linspace(0, L, N)
