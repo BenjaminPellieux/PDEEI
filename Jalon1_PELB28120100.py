@@ -1,76 +1,81 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# https://fr.wikipedia.org/wiki/Liste_de_conductivit%C3%A9s_thermiques
-# Paramètres physiques
-L: int = 1  # Dimension = du mur (m)
-l: int = 1
-h: int = 1
+# Définition des variables
 
-k: float = 0.8  # Conductivité thermique du béton (W/m·K)
-T_left: int = 100  # Température à la frontière gauche (°C) - Dirichlet
-T_right_Dirichlet: int = 25  # Température à la frontière droite (°C) - Dirichlet
-N: int = 1000  # Nombre de volumes finis
-dx: float = L / N  # Taille des volumes finis
-s: int = h * l 
+# Dimension de la barre en fer en mètre
+L=10 # Longueur
+e=1 # Largeur
+h=1 # Hauteur
+S=h*e
 
-def init_matrix() -> [np.ndarray, np.ndarray]: 
+# Conductivité thermique du fer
+k=80 #à 20°C mais considéré comme constante ici
 
-    """ Construction de la matrice du système """
+# Définition des coupe transversal
+n=100
+dx=0.1
 
-    A, B = np.zeros((N, N)), np.zeros(N)
+# Conditions limites en degrés cas 1
+Tg=100
+Td=0
 
-    for i in range(1, N-1):
-        A[i, i-1] = (k * s) / dx**2
-        A[i, i] = (-2 * k * s) / dx**2
-        A[i, i+1] = (k * s) / dx**2
-    
-    # Condition de Dirichlet à gauche
-    A[0, 0] = 1
-    B[0] = T_left
+# Définition des variables de l'équation A*T=b
+b=np.zeros(n)
+A=np.zeros((n,n))
 
-    return A, B
+# Calcul mathématique
 
-def solve_dirichlet() -> np.ndarray:
-    
-    """ Fonction pour résoudre le problème avec conditions 
-    de Dirichlet aux deux extrémités"""
-    A, b = init_matrix()
+for i in range(1,n-1):
+    A[i, i - 1] = -(k * S) / dx
+    A[i,i+1]=-(k*S)/dx
+    A[i,i]=2*(k*S)/dx
 
-    A[-1, -1] = 1  # Condition de Dirichlet à droite
-    b[-1] = T_right_Dirichlet
+# Condition aux limites CAS 1 : Dirichlet 100°C à 0°C
+A[0,0]=(k*S)/(dx/2)+(k*S)/dx
+A[0,1]=-(k*S)/dx
+b[0]=(k*S)/(dx/2) * Tg
 
-    # Résoudre le système linéaire Ax = b
-    T: np.ndarray = np.linalg.solve(A, b)
-    return T
+A[n-1,n-2]=-(k*S)/dx
+A[n-1,n-1]=(k*S)/dx+(k*S)/(dx/2)
+b[n-1]=(k*S)/(dx/2) * Td
 
-def solve_dirichlet_neumann() -> np.ndarray:
+T=np.linalg.solve(A,b)
 
-    """ Fonction pour résoudre le problème avec condition 
-    de Dirichlet à gauche et Neumann à droite """
-    A, b  = init_matrix()
+#print(A)
+#print (b)
+print (T)
 
-    # Condition de Neumann à droite
-    A[-1, -1] = -k / dx
-    A[-1, -2] = k / dx
-    b[-1] = 0
-
-    # Résoudre le système linéaire Ax = b
-    T: np.ndarray = np.linalg.solve(A, b)
-    return T
-
-# Résolution des deux scénarios
-T_dirichlet: np.ndarray = solve_dirichlet()
-T_dirichlet_neumann: np.ndarray = solve_dirichlet_neumann()
-
-# Affichage des résultats
-x = np.linspace(0, L, N)
-
-plt.plot(x, T_dirichlet, label='Dirichlet')
-plt.plot(x, T_dirichlet_neumann, label='Dirichlet-Neumann')
-plt.title('Distribution de la température dans le mur')
-plt.xlabel('Position (m)')
-plt.ylabel('Température (°C)')
-plt.legend()
+#figure CAS 1
+x1 = np.linspace(0, L, n)
+plt.figure(figsize=(10, 8))
+plt.plot(x1, T, label="Cas 1 : Conditions de Dirichlet", linestyle='-',color='blue')
+plt.title("Graphe de la température en fonction de la distance")
+plt.xlabel("longueur (m)")
+plt.ylabel("Température (°C)")
 plt.grid(True)
+plt.legend()
 plt.show()
+#+ on n est grand, + la précision est grande car la distance entre 2 centroïds est petites
+
+# Condition aux limites CAS 2 : Dirichlet 100°C et condition de Neumann libre à droite
+A[n-1,n-2]=-(k*S)/dx
+A[n-1,n-1]=(k*S)/dx
+b[n-1]=0
+
+T=np.linalg.solve(A,b)
+
+print(T)
+
+#figure CAS 2
+x1 = np.linspace(0, L, n)
+plt.figure(figsize=(10, 8))
+plt.plot(x1, T, label="Cas 1 : Conditions Dirichlet + Neumann", linestyle='-',color='blue')
+plt.title("Graphe de la température en fonction de la distance")
+plt.xlabel("longueur (m)")
+plt.ylabel("Température (°C)")
+plt.ylim([0, 120])
+plt.grid(True)
+plt.legend()
+plt.show()
+# hypothése negliger les erreurs 
