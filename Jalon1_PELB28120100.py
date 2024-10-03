@@ -12,7 +12,7 @@ T_left: int = 100  # Température à la frontière gauche (°C) - Dirichlet
 T_right_Dirichlet: int = 25  # Température à la frontière droite (°C) - Dirichlet
 N: int = 1000  # Nombre de volumes finis
 dx: float = L / N  # Taille des volumes finis
-s: int = h * l 
+S: int = h * l 
 
 def init_matrix() -> [np.ndarray, np.ndarray]: 
 
@@ -21,14 +21,13 @@ def init_matrix() -> [np.ndarray, np.ndarray]:
     A, B = np.zeros((N, N)), np.zeros(N)
 
     for i in range(1, N-1):
-        A[i, i-1] = (k * s) / dx**2
-        A[i, i] = (-2 * k * s) / dx**2
-        A[i, i+1] = (k * s) / dx**2
-    
+       A[i, i - 1] = -(k * S) / dx
+       A[i, i + 1] = -(k * S) / dx
+       A[i, i] = 2 * (k * S) / dx 
     # Condition de Dirichlet à gauche
-    A[0, 0] = 1
-    B[0] = T_left
-
+    A[0, 0] = (k * S) / (dx / 2) + (k * S) / dx  # calcul de la condition de Dirichlet à gauche
+    A[0, 1] = -(k * S) / dx
+    B[0] = (k * S) / (dx / 2) * T_left
     return A, B
 
 def solve_dirichlet() -> np.ndarray:
@@ -37,8 +36,9 @@ def solve_dirichlet() -> np.ndarray:
     de Dirichlet aux deux extrémités"""
     A, b = init_matrix()
 
-    A[-1, -1] = 1  # Condition de Dirichlet à droite
-    b[-1] = T_right_Dirichlet
+    A[N - 1, N - 2] = -(k * S) / dx  # calcul de la condition de Dirichlet à droite
+    A[N - 1, N - 1] = (k * S) / dx + (k * S) / (dx / 2)
+    b[N - 1] = (k * S) / (dx / 2) * T_right_Dirichlet
 
     # Résoudre le système linéaire Ax = b
     T: np.ndarray = np.linalg.solve(A, b)
@@ -51,11 +51,10 @@ def solve_dirichlet_neumann() -> np.ndarray:
     A, b  = init_matrix()
 
     # Condition de Neumann à droite
-    A[-1, -1] = -k / dx
-    A[-1, -2] = k / dx
-    b[-1] = 0
-
-    # Résoudre le système linéaire Ax = b
+    # Résoudre le système linéaire Ax = 
+    A[N - 1, N - 2] = -(k * S) / dx  # calcul de la condition de Neumann à droite
+    A[N - 1, N - 1] = (k * S) / dx
+    b[N - 1] = 0
     T: np.ndarray = np.linalg.solve(A, b)
     return T
 
