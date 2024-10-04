@@ -8,6 +8,8 @@ from scipy.linalg import solve_banded
 #                Constantes              #
 ##########################################
 
+
+Form_liste = ["Dirichlet-Dirichlet","Dirichlet-Neuman"]
 # Paramètres physiques
 L = 1  # Dimension = du mur (m)
 l = 1
@@ -51,7 +53,7 @@ def init_tridiagonal_matrix() -> (np.ndarray, np.ndarray):
 
     return lower_diag, main_diag, upper_diag, B
 
-def solve_dirichlet() -> np.ndarray:
+def solve_dirichlet_dirichlet() -> np.ndarray:
     """ Résolution du problème avec conditions de Dirichlet-Dirichlet """
     lower_diag, main_diag, upper_diag, B = init_tridiagonal_matrix()
 
@@ -91,7 +93,10 @@ def solve_dirichlet_neumann() -> np.ndarray:
 x = np.linspace(0, L, N)
 temps = []
 choix = int(input("Bonjour bienvenu dans la simulation de Benjamin PELLIEUX.\nEntrez votre choix: \n1: Dirichlet-Dirichlet\n2: Dirichlet-Neumann\n "))
-print(f"[INFO] Running")
+if choix == 1:
+    print(f"[INFO] Running Dirichlet-Dirichlet")
+else:
+    print(f"[INFO] Running Dirichlet-Neumann simunation ")
 print(f"[INFO] Ephoc {ephoc}s")
 
 for i in range(0, t_total, dt):
@@ -100,7 +105,7 @@ for i in range(0, t_total, dt):
         T_old[j] = T_new[j] * ((c * p * v) / dt)
 
     if choix == 1:
-        T_new = solve_dirichlet()
+        T_new = solve_dirichlet_dirichlet()
     else:
         T_new = solve_dirichlet_neumann()
 
@@ -122,7 +127,8 @@ ax = fig.add_subplot(111, projection='3d')
 
 # Afficher la température en fonction du temps et de la position
 ax.plot_surface(X, Y, all_temperatures, cmap='plasma')
-ax.set_title('Évolution de la température dans le mur')
+
+ax.set_title(f'Évolution de la température dans le mur \n avec la condition {Form_liste[choix-1]}')
 ax.set_xlabel('Position (m)')
 ax.set_ylabel('Temps (s)')
 ax.set_zlabel('Température (°C)')
