@@ -1,106 +1,99 @@
 import numpy as np
 import matplotlib.pyplot as plt
-# https://fr.wikipedia.org/wiki/Liste_de_conductivit%C3%A9s_thermiques
+from scipy.sparse import diags
+from scipy.linalg import solve_banded
+
 # Paramètres physiques
-L: int = 1  # Dimension = du mur (m)
-l: int = 1
-h: int = 1
-k: float = 80  #0.8  # Conductivité thermique du béton (W/m·K)
-T_left: int = 100  # Température à la frontière gauche (°C) - Dirichlet
-T_right_Dirichlet: int = 25  # Température à la frontière droite (°C) - Dirichlet
-N: int = 1000  # Nombre de volumes finis
-dx: float = L / N  # Taille des volumes finis
-S: int = h * l # S = A
-src = 100
-v = dx * S
-p = 7800  #2200  #kg / m3
-c = 450 #880 #(J K−1 kg−1) 
-T = 0
-t_total = 3600 * 2
-nt = 1000
+L = 1  # Dimension = du mur (m)
+l = 1
+h = 1
+k = 1 #80  Conductivité thermique du béton (W/m·K)
+T_left = 100  # Température à la frontière gauche (°C) - Dirichlet
+T_right_Dirichlet = 25  # Température à la frontière droite (°C) - Dirichlet
+N = 1000  # Nombre de volumes finis
+dx = L / N  # Taille des volumes finis
+S = h * l  # Surface
+src = 100 # source de challeur au centre 
+v = dx * S # Volume
+p = 2200 #7800 # kg / m3
+c =  880 #450  (J K−1 kg−1) 
+t_total = 3600 * 24
+ephoc = int(t_total *  0.1)
 dt = 1
-T_1 = 20
-T_old = [0 for _ in range(N)]
-T_new = [20 for _ in range(N)]
 
 
+# Initialisation des températures
+T_old = np.ones(N) * 20  # Température initiale
+T_new = np.copy(T_old)
 
-def init_matrix() -> [np.ndarray, np.ndarray]: 
-    """ Construction de la matrice du système """
-    A, B = np.zeros((N, N)), np.zeros(N)
-    for i in range(1, N-1):
-        A[i, i - 1] = -(k * S) / dx
-        A[i, i + 1] = -(k * S) / dx
-        A[i, i] = 2 * (k * S) / dx + ((p * c * v) /dt) #AE + AW + AT 
-        B[i] = T_old[i]
-    
-    # Condition de Dirichlet à gauche
-    A[0, 0] = (k * S) / (dx / 2) + (k * S) / dx 
-    A[0, 1] = -(k * S) / dx
-    B[0] = (k * S) / (dx / 2) * T_left
-    B[N//2] += src
-    B[0] = (k * S) / (dx / 2) * T_left + T_old[0]  
+def init_tridiagonal_matrix() -> (np.ndarray, np.ndarray):
+    """ Initialisation de la matrice tridiagonale et du vecteur B """
+    lower_diag = np.ones(N-1) * -(k * S) / dx
+    main_diag = np.ones(N) * (2 * (k * S) / dx + ((p * c * v) / dt))
+    upper_diag = np.ones(N-1) * -(k * S) / dx
+    B = np.copy(T_old)
 
-    return A, B
+    # Conditions aux limites Dirichlet à gauche
+    main_diag[0] = (k * S) / (dx / 2) + (k * S) / dx
+    B[0] = (k * S) / (dx / 2) * T_left + T_old[0]
 
+    return lower_diag, main_diag, upper_diag, B
 
-def solve_dirichlet(i: int = 0) -> np.ndarray:
-    
-    """ Fonction pour résoudre le problème avec conditions 
-    de Dirichlet aux deux extrémités"""
-    A, b = init_matrix()
+def solve_dirichlet() -> np.ndarray:
+    """ Résolution du problème avec conditions de Dirichlet-Dirichlet """
+    lower_diag, main_diag, upper_diag, B = init_tridiagonal_matrix()
 
-    A[N - 1, N - 2] = -(k * S) / dx 
-    A[N - 1, N - 1] = (k * S) / dx + (k * S) / (dx / 2) + ((p * c * v) / dt)
-    b[N - 1] = (k * S) / (dx / 2) * T_right_Dirichlet + T_old[-1]
-    
-    
-    T: np.ndarray = np.linalg.solve(A, b)
-    T_new = T
-    return T
+    # Condition Dirichlet à droite
+    main_diag[-1] = (k * S) / dx + (k * S) / (dx / 2) + ((p * c * v) / dt)
+    B[-1] = (k * S) / (dx / 2) * T_right_Dirichlet + T_old[-1]
 
-def solve_dirichlet_neumann(i: int = None) -> np.ndarray:
-    """ Fonction pour résoudre le problème avec condition 
-    de Dirichlet à gauche et Neumann à droite """
-    A, b  = init_matrix()
-    
-    A[N - 1, N - 2] = -(k * S) / dx  
-    A[N - 1, N - 1] = (k * S) / dx + ((p * c * v) / dt)
-    b[N - 1] =  T_old[-1]  
-    
-    T: np.ndarray = np.linalg.solve(A, b)
-    T_new = T
-    return T
+    # Résolution via solve_banded pour matrice tridiagonale
+    ab = np.zeros((3, N))
+    ab[0, 1:] = upper_diag  # Surdiagonale
+    ab[1, :] = main_diag    # Diagonale principale
+    ab[2, :-1] = lower_diag  # Sous-diagonale
 
+    T_new = solve_banded((1, 1), ab, B)
+    return T_new
+
+def solve_dirichlet_neumann() -> np.ndarray:
+    """ Résolution du problème avec conditions Dirichlet-Neumann """
+    lower_diag, main_diag, upper_diag, B = init_tridiagonal_matrix()
+
+    # Condition Neumann à droite
+    main_diag[-1] = (k * S) / dx + ((p * c * v) / dt)
+    B[-1] = T_old[-1]
+
+    # Résolution via solve_banded pour matrice tridiagonale
+    ab = np.zeros((3, N))
+    ab[0, 1:] = upper_diag  # Surdiagonale
+    ab[1, :] = main_diag    # Diagonale principale
+    ab[2, :-1] = lower_diag  # Sous-diagonale
+
+    T_new = solve_banded((1, 1), ab, B)
+    return T_new
 
 # Résolution des deux scénarios
-# T_dirichlet: np.ndarray = solve_dirichlet()
-# T_dirichlet_neumann: np.ndarray = solve_dirichlet_neumann()
-
 x = np.linspace(0, L, N)
-fig, (ax1, ax2) = plt.subplots(1, 2)
-fig.suptitle('Horizontally stacked subplots')
-plt.ylim(0, 200)
+choix = int(input("Entrez choix: \n1: Dirichlet-Dirichlet\n2: Dirichlet-Neumann\n "))
 
-choix =  int(input("Entrez choix: \n1: Dirichlet-Dirichlet\n2: Dirichlet-Neuman\n "))
-for i in range(t_total):
-    
-    #print(f"[DEBUG] {i}")
-    for i in range(N):
-        T_old[i] = T_new[i] * ((c * p * v) / dt)
+for i in range(0, t_total, dt):
+    for j in range(N):
+        T_old[j] = T_new[j] * ((c * p * v) / dt)
 
     if choix == 1:
-        
-        ax1.plot(x, solve_dirichlet(i), label='Dirichlet')
+        T_new = solve_dirichlet()
     else:
-        ax2.plot(x, solve_dirichlet_neumann(i),  label='Dirichlet-Neumann')
+        T_new = solve_dirichlet_neumann()
 
-# Affichage des résultats
+    # Affichage des courbes à des intervalles réguliers, par ex. toutes les 600 secondes
+    if i % ephoc == 0:
+        plt.plot(x, T_new, label=f'Temps = {i} s')
 
-
-plt.title('Distribution de la température dans le mur ')
+# Affichage final des résultats
+plt.title('Distribution de la température dans le mur (régime transitoire)')
 plt.xlabel('Position (m)')
 plt.ylabel('Température (°C)')
-#plt.legend()
+plt.legend()
 plt.grid(True)
 plt.show()
