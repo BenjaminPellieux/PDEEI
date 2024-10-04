@@ -1,12 +1,24 @@
 import numpy as np
 import matplotlib.pyplot as plt
+
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.sparse import diags
 from scipy.linalg import solve_banded
 
+
+
+
+
 ##########################################
 #                Constantes              #
 ##########################################
+
+op=0.9,
+bottom=0.1,
+left=0.12,
+right=0.9,
+hspace=0.2,
+wspace=0.2
 
 
 Form_liste = ["Dirichlet-Dirichlet","Dirichlet-Neuman"]
@@ -24,9 +36,10 @@ src = 100  # Source de chaleur au centre
 v = dx * S  # Volume
 p = 2200  # kg/m3
 c = 880  # (J/K·kg)
-t_total = 3600 * 72  # Simulation sur 72 heures
+heures = 96
+t_total = 3600 * heures  # Simulation sur 72 heures
 ephoc = int(t_total * 0.1)
-dt = 1800  # Intervalle de temps en secondes (30 minutes)
+dt = 900  # Intervalle de temps en secondes (15 minutes)
 
 # Initialisation des températures
 T_old = np.ones(N) * 20  # Température initiale
@@ -128,7 +141,7 @@ ax = fig.add_subplot(111, projection='3d')
 # Afficher la température en fonction du temps et de la position
 ax.plot_surface(X, Y, all_temperatures, cmap='plasma')
 
-ax.set_title(f'Évolution de la température dans le mur \n avec la condition {Form_liste[choix-1]}')
+ax.set_title(f'Évolution de la température dans le mur \n avec la condition {Form_liste[choix-1]}.\n Durée de simulation : {heures}h')
 ax.set_xlabel('Position (m)')
 ax.set_ylabel('Temps (s)')
 ax.set_zlabel('Température (°C)')
