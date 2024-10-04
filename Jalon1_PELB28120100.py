@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 from scipy.sparse import diags
 from scipy.linalg import solve_banded
 
+##########################################
+#                Constante               #
+##########################################
+
 # Paramètres physiques
 L = 1  # Dimension = du mur (m)
 l = 1
@@ -17,9 +21,9 @@ src = 100 # source de challeur au centre
 v = dx * S # Volume
 p = 2200 #7800 # kg / m3
 c =  880 #450  (J K−1 kg−1) 
-t_total = 3600 * 24
+t_total = 3600 * 72
 ephoc = int(t_total *  0.1)
-dt = 1
+dt = 1800
 
 
 # Initialisation des températures
@@ -36,6 +40,7 @@ def init_tridiagonal_matrix() -> (np.ndarray, np.ndarray):
     # Conditions aux limites Dirichlet à gauche
     main_diag[0] = (k * S) / (dx / 2) + (k * S) / dx
     B[0] = (k * S) / (dx / 2) * T_left + T_old[0]
+    B[N//2] += src
 
     return lower_diag, main_diag, upper_diag, B
 
@@ -70,14 +75,13 @@ def solve_dirichlet_neumann() -> np.ndarray:
     ab[1, :] = main_diag    # Diagonale principale
     ab[2, :-1] = lower_diag  # Sous-diagonale
 
-    T_new = solve_banded((1, 1), ab, B)
-    return T_new
+    return solve_banded((1, 1), ab, B)
 
 # Résolution des deux scénarios
 x = np.linspace(0, L, N)
 choix = int(input("Bonjour bien venu dans la simulation de Benjamin PELLIEUX.\nEntrez votre choix: \n1: Dirichlet-Dirichlet\n2: Dirichlet-Neumann\n "))
 print(f"[INFO] Running")
-print(f"[INFO] Ephoc {ephoc}")
+print(f"[INFO] Ephoc {ephoc}s")
 for i in range(0, t_total, dt):
     
     for j in range(N):
@@ -89,8 +93,8 @@ for i in range(0, t_total, dt):
         T_new = solve_dirichlet_neumann()
 
     # Affichage des courbes à des intervalles réguliers, par ex. toutes les 600 secondes
-    if i % ephoc == 0:
-        plt.plot(x, T_new, label=f'Temps = {i//3600}h{i%3600}  s')
+    #if i % ephoc == 0:
+    plt.plot(x, T_new, label=f'Temps = {i//3600}h{i%3600}  s')
 
 # Affichage final des résultats
 plt.title('Distribution de la température dans le mur (régime transitoire)')
