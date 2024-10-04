@@ -75,9 +75,11 @@ def solve_dirichlet_neumann() -> np.ndarray:
 
 # Résolution des deux scénarios
 x = np.linspace(0, L, N)
-choix = int(input("Entrez choix: \n1: Dirichlet-Dirichlet\n2: Dirichlet-Neumann\n "))
-
+choix = int(input("Bonjour bien venu dans la simulation de Benjamin PELLIEUX.\nEntrez votre choix: \n1: Dirichlet-Dirichlet\n2: Dirichlet-Neumann\n "))
+print(f"[INFO] Running")
+print(f"[INFO] Ephoc {ephoc}")
 for i in range(0, t_total, dt):
+    
     for j in range(N):
         T_old[j] = T_new[j] * ((c * p * v) / dt)
 
@@ -88,7 +90,7 @@ for i in range(0, t_total, dt):
 
     # Affichage des courbes à des intervalles réguliers, par ex. toutes les 600 secondes
     if i % ephoc == 0:
-        plt.plot(x, T_new, label=f'Temps = {i} s')
+        plt.plot(x, T_new, label=f'Temps = {i//3600}h{i%3600}  s')
 
 # Affichage final des résultats
 plt.title('Distribution de la température dans le mur (régime transitoire)')
