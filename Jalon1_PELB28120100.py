@@ -7,6 +7,9 @@ from scipy.linalg import solve_banded
 
 
 
+# ADD GEOMETRIE MULTICOUCHE
+
+
 
 
 ##########################################
