@@ -79,6 +79,7 @@ La simulation produit des graphiques 3D illustrant la \textbf{distribution de la
     \label{fig:jalon2_comparaison_dirichlet_neumann}
 \end{figure}
 
+\newpage
 \subsection{Analyse des résultats}
 Les graphiques présentés aux figures \ref{fig:jalon2_dirichlet_dirichlet_96H}, \ref{fig:jalon2_dirichlet_dirichlet_128H}, \ref{fig:jalon2_dirichlet_neumann_96H} et \ref{fig:jalon2_dirichlet_neumann_128H} montrent l'évolution de la température dans un mur de béton en fonction de la position et du temps pour deux types de conditions aux limites (Dirichlet-Dirichlet et Dirichlet-Neumann) et pour deux durées de simulation (96 heures et 128 heures).
 
@@ -101,8 +102,8 @@ Les graphiques présentés aux figures \ref{fig:jalon2_dirichlet_dirichlet_96H},
     \item Dans le cas Dirichlet-Neumann, l'effet de la condition de flux nul est plus marqué avec le temps, montrant une tendance à conserver davantage de chaleur sur la partie droite du mur. Cela confirme que le flux nul agit comme une barrière à la dissipation de la chaleur.
 \end{itemize}
 
-
-\subsection{Conclusion}
+\newpage
+\section{Conclusion}
 Les simulations réalisées dans le cadre du Jalon 2 ont permis de modéliser et d'analyser la diffusion de la chaleur à travers un mur en béton en régime transitoire, en prenant en compte différentes conditions aux limites (Dirichlet-Dirichlet et Dirichlet-Neumann) et des durées de simulation prolongées (96 heures et 128 heures). 
 
 Les résultats montrent que le choix des conditions aux limites a un impact significatif sur la manière dont la chaleur se dissipe au fil du temps :
@@ -114,5 +115,23 @@ Les résultats montrent que le choix des conditions aux limites a un impact sign
 La comparaison entre les durées de 96 heures et 128 heures a également mis en lumière l'importance de la durée de simulation pour observer la stabilisation des températures dans le mur. L'allongement de la durée de simulation permet d'approcher plus fidèlement l'état d'équilibre thermique, particulièrement dans le cas des conditions Dirichlet-Dirichlet.
 
 Ces analyses soulignent la nécessité de prendre en compte la dynamique temporelle dans la conception de systèmes de gestion thermique. Elles permettent de mieux comprendre le comportement d'un matériau dans des conditions réalistes de chauffage, offrant des perspectives pour l'optimisation de la consommation énergétique dans les bâtiments. Le prochain jalon se concentrera sur l'optimisation des cycles de chauffage pour maximiser l'efficacité énergétique tout en maintenant un confort thermique adapté aux besoins des occupants.
+
+\subsection{Conclusion}
+Les résultats obtenus ont été partagés sur un dépôt GitHub pour permettre la reproductibilité des simulations et le suivi des évolutions du projet. Le code source et les données sont disponibles à l'adresse suivante : \url{https://github.com/BenjaminPellieux/PDEEI/tree/Jalon2}.
+
+
+\newpage
+\section*{Bibliographie}
+\begin{thebibliography}{9}
+    \bibitem{conductivite_thermique}
+    \textit{Liste de conductivités thermiques}, Wikipédia. Disponible à : \url{https://fr.wikipedia.org/wiki/Liste_de_conductivit%C3%A9s_thermiques}. Consulté le [date de consultation].
+    
+    \bibitem{scipy}
+    Virtanen, P., Gommers, R., Oliphant, T. E., et al. (2020). \textit{SciPy 1.0: Fundamental Algorithms for Scientific Computing in Python}. Nature Methods, 17(3), 261–272. Disponible à : \url{https://www.scipy.org/}.
+    
+    \bibitem{github}
+    Pellieux, B. (2024). \textit{Projet PDEEI - Jalon 2}. GitHub. Disponible à : \url{https://github.com/BenjaminPellieux/PDEEI/tree/Jalon2}.
+\end{thebibliography}
+
 
 \end{document}
