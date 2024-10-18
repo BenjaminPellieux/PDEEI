@@ -7,29 +7,20 @@ from scipy.linalg import solve_banded
 
 
 
-# ADD GEOMETRIE MULTICOUCHE
-
-
-
+# TODO: ADD GEOMETRIE MULTICOUCHE
 
 ##########################################
 #                Constantes              #
 ##########################################
 
-op=0.9,
-bottom=0.1,
-left=0.12,
-right=0.9,
-hspace=0.2,
-wspace=0.2
 
 
 Form_liste = ["Dirichlet-Dirichlet","Dirichlet-Neuman"]
 # Paramètres physiques
-L = 1  # Dimension = du mur (m)
-l = 1
-h = 1
-k = 1  # Conductivité thermique du béton (W/m·K)
+L = 2  # loongeur Dimension = du mur (m)
+l = 0.30  # Largeur 
+h = 2
+k = 1.5  # Conductivité thermique du béton (W/m·K)
 T_left = 100  # Température à la frontière gauche (°C) - Dirichlet
 T_right_Dirichlet = 25  # Température à la frontière droite (°C) - Dirichlet
 N = 1000  # Nombre de volumes finis
