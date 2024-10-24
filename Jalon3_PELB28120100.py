@@ -21,13 +21,12 @@ Form_liste = ["Dirichlet-Dirichlet","Dirichlet-Neuman"]
 
 L = 1  # longeur Dimension = du mur (m)
 l = 0.30  # Largeur 
-h = 2 # Hauteur
+h = 1 # Hauteur
 S = h * l  # Surface
 N = 1000  # Nombre de volumes finis
 dx = L / N  # Taille des volumes finis
 v = dx * S  # Volume
 
-comp_mur=[L/6,L/6,L*4/6]
 # 1/6 beton // 1/6 air // 4/6 beton
 
 ###################################
@@ -40,7 +39,7 @@ temperature_data['Time'] = pd.to_datetime(temperature_data['Time'], format='%I:%
 # Extract the temperature values and convert them from Fahrenheit to Celsius for T_left
 temperature_data['Temperature_C'] = (temperature_data['Temperature'].str.replace(' °F', '').astype(float) - 32) * 5/9
 # Display the first few rows of the processed data
-print(f"{temperature_data[['Time', 'Temperature_C']].head()}")
+# print(f"{temperature_data[['Time', 'Temperature_C']].head()}")
 
 T_left = 100  # Température à la frontière gauche (°C) - Dirichlet
 T_right = 50  # Température à la frontière droite (°C) - Dirichlet
@@ -73,18 +72,18 @@ c_values = np.array([c_beton] * comp_mur[0] + [c_air] * comp_mur[1] + [c_beton] 
 p_values = np.array([p_beton] * comp_mur[0] + [p_air] * comp_mur[1] + [p_beton] * comp_mur[2])
 
 
-heures = 72
+heures = 24
 t_total = 3600 * heures  # Simulation sur 72 heures
 ephoc = int(t_total * 0.1)
 dt = 900  # Intervalle de temps en secondes (15 minutes)
-src = 200  # Source de chaleur au centre
+src = 0  # Source de chaleur au centre
 # Initialisation des températures
 T_old = np.ones(N) * 20  # Température initiale
 T_new = np.copy(T_old)
 
 # 1/6 beton // 1/6 air // 4/6 beton
 
-print(f"[DEBUG]{N=}\n {k_values.shape=}\n {c_values.shape=}\n {p_values.shape=}")
+# print(f"[DEBUG]{N=}\n {k_values.shape=}\n {c_values.shape=}\n {p_values.shape=}\n {k_values=}")
 # Stocker les résultats pour afficher en 3D
 all_temperatures = []
 
@@ -103,7 +102,7 @@ def init_tridiagonal_matrix() -> (np.ndarray, np.ndarray):
    
     # Remplissage des coefficients pour chaque volume fini
     for i in range(1, N - 1):
-        k_eff = (k_values[i - 1] + k_values[i]) / (2 * dx) # Conductivité effective entre deux volumes adjacents
+        k_eff = (k_values[i - 1] + k_values[i]) / 2 # Conductivité effective entre deux volumes adjacents
         lower_diag[i - 1] = -k_eff * S / dx
         upper_diag[i] = -k_eff * S / dx
         main_diag[i] = 2 * k_eff * S / dx + (p_values[i] * c_values[i] * v) / dt
