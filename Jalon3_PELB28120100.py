@@ -4,7 +4,7 @@ import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.sparse import diags
 from scipy.linalg import solve_banded
-
+from datetime import datetime
 
 
 # TODO: ADD GEOMETRIE MULTICOUCHE
@@ -14,6 +14,7 @@ from scipy.linalg import solve_banded
 ##########################################
 
 Form_liste = ["Dirichlet-Dirichlet","Dirichlet-Neuman"]
+
 
 ###################################
 #        Donnée du mur            #
@@ -33,16 +34,14 @@ v = dx * S  # Volume
 #       Donnée des temperatures   #
 ###################################
 # T_left from cvs file avec conversion en °C
-temperature_data = pd.read_csv("temperature_data_28_12_2023.csv")
 
-temperature_data['Time'] = pd.to_datetime(temperature_data['Time'], format='%I:%M %p')
-# Extract the temperature values and convert them from Fahrenheit to Celsius for T_left
-temperature_data['Temperature_C'] = (temperature_data['Temperature'].str.replace(' °F', '').astype(float) - 32) * 5/9
-# Display the first few rows of the processed data
-# print(f"{temperature_data[['Time', 'Temperature_C']].head()}")
+T_dataset = pd.read_csv("temperature_data_28_12_2023.csv")
+T_dataset['Time'] = pd.to_datetime(T_dataset['Time'], format='%I:%M %p').dt.time
+T_dataset['Temperature_C'] = (T_dataset['Temperature'].str.replace(' °F', '').astype(float) - 32) * 5/9
 
-T_left = 100  # Température à la frontière gauche (°C) - Dirichlet
-T_right = 50  # Température à la frontière droite (°C) - Dirichlet
+T_left = None  # Température à la frontière gauche (°C) - Dirichlet
+T_right = 21  # Température à la frontière droite (°C) - Dirichlet
+src = 0  # Source de chaleur au centre
 
 ###################################
 #       Donnée du Béton           #
@@ -64,27 +63,19 @@ c_air = 1004  # (J/K·kg)
 #     Parametre de Simulation     #
 ###################################
 
-
-comp_mur=[round(N/6),round(N/6),round(N*4/6)-1]
-
+# 1/6 beton // 1/6 air // 4/6 beton
+comp_mur = [round(N / 6), round(N / 6), round(N * 4 / 6 ) - 1]
 k_values = np.array([k_beton] * comp_mur[0] + [k_air] * comp_mur[1] + [k_beton] * comp_mur[2])
 c_values = np.array([c_beton] * comp_mur[0] + [c_air] * comp_mur[1] + [c_beton] * comp_mur[2])
 p_values = np.array([p_beton] * comp_mur[0] + [p_air] * comp_mur[1] + [p_beton] * comp_mur[2])
 
-
 heures = 24
-t_total = 3600 * heures  # Simulation sur 72 heures
-ephoc = int(t_total * 0.1)
+t_total = 3600 * heures  # Simulation sur X heures
 dt = 900  # Intervalle de temps en secondes (15 minutes)
-src = 0  # Source de chaleur au centre
-# Initialisation des températures
-T_old = np.ones(N) * 20  # Température initiale
+
+T_old = np.ones(N) * 1  # Température initiale
 T_new = np.copy(T_old)
 
-# 1/6 beton // 1/6 air // 4/6 beton
-
-# print(f"[DEBUG]{N=}\n {k_values.shape=}\n {c_values.shape=}\n {p_values.shape=}\n {k_values=}")
-# Stocker les résultats pour afficher en 3D
 all_temperatures = []
 
 ##########################################
@@ -125,7 +116,6 @@ def solve_dirichlet_dirichlet() -> np.ndarray:
     main_diag[-1] = (k_values[-1] * S) / dx + (k_values[-1] * S) / (dx / 2) + ((p_values[-1] * c_values[-1] * v) / dt)
     B[-1] = (k_values[-1] * S) / (dx / 2) * T_right + T_old[-1]
 
-    # Résolution via solve_banded pour matrice tridiagonale
     ab = np.zeros((3, N))
     ab[0, 1:] = upper_diag  # Surdiagonale
     ab[1, :] = main_diag    # Diagonale principale
@@ -141,7 +131,6 @@ def solve_dirichlet_neumann() -> np.ndarray:
     main_diag[-1] = (k_values[-1] * S) / dx + ((p_values[-1] * c_values[-1] * v) / dt)
     B[-1] = T_old[-1]
 
-    # Résolution via solve_banded pour matrice tridiagonale
     ab = np.zeros((3, N))
     ab[0, 1:] = upper_diag  # Surdiagonale
     ab[1, :] = main_diag    # Diagonale principale
@@ -153,7 +142,6 @@ def solve_dirichlet_neumann() -> np.ndarray:
 #           Boucle de simulation         #
 ##########################################
 
-# Résolution des deux scénarios
 x = np.linspace(0, L, N)
 temps = []
 choix = int(input("Bonjour bienvenu dans la simulation de Benjamin PELLIEUX.\nEntrez votre choix: \n1: Dirichlet-Dirichlet\n2: Dirichlet-Neumann\n "))
@@ -161,11 +149,17 @@ if choix == 1:
     print(f"[INFO] Running Dirichlet-Dirichlet")
 else:
     print(f"[INFO] Running Dirichlet-Neumann simunation ")
-print(f"[INFO] Ephoc {ephoc}s")
 print(f"[INFO] Durée en seconde {t_total}s")
+print(f"[INFO] Nombre d'éléments finis : {N} \n {k_values.shape}")
+
 
 for i in range(0, t_total, dt):
-    
+
+    try:
+        T_left = T_dataset[T_dataset['Time'] == datetime.strptime(f"{(i // 3600) % 24}::00::00", '%H::%M::%S').time()]['Temperature_C'].values[0]
+    except ValueError:
+        print("[ERROR] Aucune température a cette heure")
+
     for j in range(N):
         T_old[j] = T_new[j] * ((c_values[j] * p_values[j] * v) / dt)
 
@@ -182,7 +176,6 @@ for i in range(0, t_total, dt):
 #         Affichage 3D des résultats     #
 ##########################################
 
-# Convertir les données pour la visualisation
 all_temperatures = np.array(all_temperatures)  # (temps, position)
 temps = np.array(temps)
 X, Y = np.meshgrid(x, temps)
