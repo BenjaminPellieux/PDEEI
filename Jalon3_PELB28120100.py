@@ -13,16 +13,22 @@ from datetime import datetime
 #                Constantes              #
 ##########################################
 
+T_base = 10
+YEAR = 2023
+MONTH = 7
+DAY = 6
+file_path = f"data/WD__{YEAR}.csv"
 Form_liste = ["Dirichlet-Dirichlet","Dirichlet-Neuman"]
+TODAY = datetime.today().strftime('%m-%d')
 
 
 ###################################
 #        Donnée du mur            #
 ###################################
 
-L = 1  # longeur Dimension = du mur (m)
-l = 0.30  # Largeur 
-h = 1 # Hauteur
+L = 0.5  # longeur Dimension = du mur (m)
+l = 0.2  # Largeur 
+h = 0.2 # Hauteur
 S = h * l  # Surface
 N = 1000  # Nombre de volumes finis
 dx = L / N  # Taille des volumes finis
@@ -33,11 +39,13 @@ v = dx * S  # Volume
 ###################################
 #       Donnée des temperatures   #
 ###################################
-# T_left from cvs file avec conversion en °C
 
-T_dataset = pd.read_csv("temperature_data_28_12_2023.csv")
-T_dataset['Time'] = pd.to_datetime(T_dataset['Time'], format='%I:%M %p').dt.time
-T_dataset['Temperature_C'] = (T_dataset['Temperature'].str.replace(' °F', '').astype(float) - 32) * 5/9
+temperature_data = pd.read_csv(file_path)
+temperature_data['Date'] = pd.to_datetime(temperature_data['Date'], format='%Y/%m/%d %I:%M %p')
+temperature_data.set_index('Date', inplace=True)
+
+# Extract temperature data
+temperature_data['Temperature (°C)'] = temperature_data['Temperature (°C)'].astype(float)
 
 T_left = None  # Température à la frontière gauche (°C) - Dirichlet
 T_right = 21  # Température à la frontière droite (°C) - Dirichlet
@@ -69,11 +77,11 @@ k_values = np.array([k_beton] * comp_mur[0] + [k_air] * comp_mur[1] + [k_beton] 
 c_values = np.array([c_beton] * comp_mur[0] + [c_air] * comp_mur[1] + [c_beton] * comp_mur[2])
 p_values = np.array([p_beton] * comp_mur[0] + [p_air] * comp_mur[1] + [p_beton] * comp_mur[2])
 
-heures = 24
+heures = 72
 t_total = 3600 * heures  # Simulation sur X heures
 dt = 900  # Intervalle de temps en secondes (15 minutes)
 
-T_old = np.ones(N) * 1  # Température initiale
+T_old = np.ones(N) * 20  # Température initiale
 T_new = np.copy(T_old)
 
 all_temperatures = []
@@ -155,10 +163,12 @@ print(f"[INFO] Nombre d'éléments finis : {N} \n {k_values.shape}")
 
 for i in range(0, t_total, dt):
 
+    current_time = datetime(YEAR, MONTH, DAY) + pd.Timedelta(hours= (i // 3600) % 24)
     try:
-        T_left = T_dataset[T_dataset['Time'] == datetime.strptime(f"{(i // 3600) % 24}::00::00", '%H::%M::%S').time()]['Temperature_C'].values[0]
-    except ValueError:
-        print("[ERROR] Aucune température a cette heure")
+        T_left = temperature_data.loc[current_time, 'Temperature (°C)']
+    except KeyError:
+        print(f"[ERROR] No temperature data available for time: {current_time}")
+        T_left = 0  # fallback value in case of missing data
 
     for j in range(N):
         T_old[j] = T_new[j] * ((c_values[j] * p_values[j] * v) / dt)

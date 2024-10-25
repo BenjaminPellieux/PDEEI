@@ -1,4 +1,4 @@
-Time,Temperature,Dew Point,Humidity,Wind,Wind Speed,Wind Gust,Pressure,Precip.,Condition,Temperature (°C),Wind Speed (m/s),Pressure (Pa)
+Date,Temperature,Dew Point,Humidity,Wind,Wind Speed,Wind Gust,Pressure,Precip.,Condition,Temperature (°C),Wind Speed (m/s),Pressure (Pa)
 2021/1/1 1:00 AM,14 °F,9 °F,79 %,W,9 mph,0 mph,29.75 in,0.0 in,Cloudy,-10.0,4.02336,100745.1025
 2021/1/1 2:00 AM,14 °F,7 °F,73 %,WNW,9 mph,0 mph,29.77 in,0.0 in,Cloudy,-10.0,4.02336,100812.8303
 2021/1/1 3:00 AM,14 °F,9 °F,79 %,W,7 mph,0 mph,29.81 in,0.0 in,Light Snow,-10.0,3.12928,100948.28589999999

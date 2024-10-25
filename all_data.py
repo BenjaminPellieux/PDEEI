@@ -24,23 +24,24 @@ agenda = {"1":31,
           "10":31,
           "11":30,
           "12":31
-}
-
-service = FirefoxService(executable_path='/usr/local/bin/geckodriver')
+} 
 HEADER = ["Time", "Temperature" ,"Dew Point", "Humidity", "Wind", "Wind Speed", "Wind Gust", "Pressure", "Precip.", "Condition"]
-driver = webdriver.Firefox(service=service)
-data = []
+DRIVER = webdriver.Firefox(service=FirefoxService(executable_path='/usr/local/bin/geckodriver'))
+DATA = []
 
-def scrape_weather_data(year, month, day):
+def scrape_weather_data(year = YEAR, month, day):
     # Construire l'URL
     url = f"https://www.wunderground.com/history/daily/ca/la-baie/CYBG/date/{year}-{month:02d}-{day:02d}"
-    driver.implicitly_wait(5)
-    driver.get(url)
+    DRIVER.implicitly_wait(5)
+    DRIVER.get(url)
     if month == 1 and day == 1  :
         sleep(2)  # Attendre quelques secondes pour que le contenu dynamique se charge
     print("WAITED")
     sleep(0.5)
-    table = driver.find_element(By.XPATH, '//table[@class="mat-table cdk-table mat-sort ng-star-inserted"]')
+    try:
+        table = DRIVER.find_element(By.XPATH, '//table[@class="mat-table cdk-table mat-sort ng-star-inserted"]')
+    except:
+        print(f"[ERROR] No data found for the date : {day}/{YEAR}/{year}")
     rows = table.find_elements(By.TAG_NAME, 'tr')
 
     
@@ -49,12 +50,11 @@ def scrape_weather_data(year, month, day):
     for row in rows:
         cols = row.find_elements(By.TAG_NAME, 'td')
         if cols:
-            
             tmp_data = [col.text for col in cols]
             tmp_data[0] = f"{year}/{month}/{day} {tmp_data[0]}"
-            #print(f"[INFO] {i}/{len(rows)} {tmp_data} DONE")
-            data.append(tmp_data)
-        elif i>len(rows)-11:
+            DATA.append(tmp_data)
+        
+        elif i > len(rows) - 11:
             break
         i+=1
 
@@ -63,7 +63,7 @@ for month in agenda:
     for day in range(1,agenda[month] + 1):
         print(f"[INFO] Scraping date: {day}/{month}/{YEAR}")
         scrape_weather_data(YEAR, int(month), day)
-        driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.CONTROL + 't')
+        DRIVER.find_element(By.TAG_NAME, 'body').send_keys(Keys.CONTROL + 't')
 
 
 df = pd.DataFrame(data, columns=HEADER)

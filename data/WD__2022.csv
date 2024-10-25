@@ -1,4 +1,4 @@
-Time,Temperature,Dew Point,Humidity,Wind,Wind Speed,Wind Gust,Pressure,Precip.,Condition,Temperature (°C),Wind Speed (m/s),Pressure (Pa)
+Date,Temperature,Dew Point,Humidity,Wind,Wind Speed,Wind Gust,Pressure,Precip.,Condition,Temperature (°C),Wind Speed (m/s),Pressure (Pa)
 2022/1/1 1:00 AM,25 °F,23 °F,93 %,ESE,3 mph,0 mph,29.29 in,0.0 in,Cloudy,-3.888888888888889,1.34112,99187.36309999999
 2022/1/1 2:00 AM,25 °F,23 °F,93 %,SSE,3 mph,0 mph,29.28 in,0.0 in,Cloudy,-3.888888888888889,1.34112,99153.4992
 2022/1/1 3:00 AM,25 °F,23 °F,93 %,CALM,0 mph,0 mph,29.28 in,0.0 in,Cloudy,-3.888888888888889,0.0,99153.4992
