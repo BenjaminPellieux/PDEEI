@@ -7,7 +7,6 @@ from scipy.linalg import solve_banded
 from datetime import datetime, timedelta
 from matplotlib.animation import FuncAnimation
 
-
 ##########################################
 #                Constantes              #
 ##########################################
@@ -23,7 +22,6 @@ L = 0.30  # longeur Dimension = du mur (m)
 l = 3  # Largeur 
 h = 2 # Hauteur
 S = h * l  # Surface
-
 # 1/6 beton // 1/6 air // 4/6 beton
 
 ###################################
@@ -70,8 +68,6 @@ NVF_tot = NVF_beton1 + NVF_air + NVF_beton_conducteur + NVF_beton2
 comp_mur = [round(NVF_tot / 6), round(NVF_tot / 6), round(NVF_tot / 20)]
 NVF_beton2 = NVF_tot - sum(comp_mur)
 comp_mur.append(NVF_beton2)
-
-
  
 k_values = np.array([k_beton] * comp_mur[0] + 
                     [k_air]   * comp_mur[1] + 
@@ -101,8 +97,8 @@ dt = 1800  # Intervalle de temps en secondes (30 minutes)
 
 T_old = np.ones(NVF_tot) * T_init  # Température initiale
 T_new = np.copy(T_old)
-src   = np.zeros(NVF_tot)
-src[NVF_beton1 + NVF_air : NVF_beton1 + NVF_air + NVF_beton_conducteur] = power_beton_conducteur  # 100 W
+src = np.zeros(NVF_tot)
+src[NVF_beton1 + NVF_air : NVF_beton1 + NVF_air + NVF_beton_conducteur] = power_beton_conducteur
 
 # Stocker toutes les températures pour chaque étape de temps
 all_temperatures = []
@@ -127,8 +123,6 @@ def solve_mixte_neumann() -> np.ndarray:
         if float(T_old[-1]) < T_cible:
             B[i] += src[i] * ((c_values[i] * p_values[i] * v_values[i]) / dt)
 
-
-        #h_air * S
     k_eff_upper = (((dx_values[0] * k_values[0] + dx_values[1] * k_values[1]) * S) / (dx_values[0] + dx_values[1])) /  ((dx_values[0] + dx_values[1]) / 2)
     A[0, 1] = -k_eff_upper
     A[0, 0], B[0] = h_air * S +  k_eff_upper + ((c_values[0] * p_values[0] * v_values[0]) / dt), h_air * S  * T_left + T_old[0]  
@@ -147,7 +141,6 @@ def init_ani():
     return line, time_text
 
 def update_ani(frame):
-    # Récupérer les valeurs stockées pour cette étape
     T_new = all_temperatures[frame]
     line.set_data(x, T_new)
     time_text.set_text(f'Heure de simulation : {frame * dt / 3600:.2f}h \n Température intérieur {float(T_new[-1]):.2f}°C')
@@ -168,13 +161,12 @@ print(f"[INFO] Running Mixte - Neumann")
 print(f"[INFO] Durée en seconde {t_total}s")
 print(f"[INFO] Nombre d'éléments finis : {NVF_tot}")
 
-# Exécuter la simulation et stocker les résultats
 for _ in range(0, t_total, dt):
 
     for j in range(NVF_tot):
         T_old[j] = T_new[j] * ((c_values[j] * p_values[j] * v_values[j]) / dt)
     T_new = solve_mixte_neumann()
-    all_temperatures.append(T_new.copy())  # Stocker une copie de T_new à chaque étape
+    all_temperatures.append(T_new.copy())
 
 ##########################################
 #         Affichage des résultats        #
@@ -196,5 +188,5 @@ ani = FuncAnimation(fig, update_ani, frames=len(all_temperatures), init_func=ini
 if GIF:
     ani.save("Simulation_Jalon3.gif", writer='pillow', fps=FPS)
     print("L'animation a été enregistrée sous le nom Simulation_Jalon3.gif")
-
+    
 plt.show()
