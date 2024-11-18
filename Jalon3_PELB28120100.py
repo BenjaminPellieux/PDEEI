@@ -12,7 +12,7 @@ from matplotlib.animation import FuncAnimation
 ##########################################
 
 FPS = 60
-GIF = False
+GIF = True
 
 ###################################
 #        Donnée du mur            #
@@ -46,7 +46,7 @@ c_beton = 880  # Capacitée thermique du beton (J/K·kg)
 ###################################
 
 power_beton_conducteur = 3000
-NVF_beton_conducteur = 5
+NVF_beton_conducteur = 10
 
 ###################################
 #       Donnée de l'air           #
@@ -98,7 +98,7 @@ dt = 1800  # Intervalle de temps en secondes (30 minutes)
 T_old = np.ones(NVF_tot) * T_init  # Température initiale
 T_new = np.copy(T_old)
 src = np.zeros(NVF_tot)
-src[NVF_beton1 + NVF_air : NVF_beton1 + NVF_air + NVF_beton_conducteur] = power_beton_conducteur
+src[NVF_beton1 + NVF_air : NVF_beton1 + NVF_air + NVF_beton_conducteur] = power_beton_conducteur / NVF_beton_conducteur
 
 # Stocker toutes les températures pour chaque étape de temps
 all_temperatures = []
