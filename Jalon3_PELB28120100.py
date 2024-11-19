@@ -45,8 +45,8 @@ S: int = h * l  # Surface du mur (m²)
 ###################################
 
 # Températures initiales et limites
-T_init: int = 12  # Température initiale dans le mur (°C)
-T_left: int = 15  # Température à la frontière gauche (°C) - Dirichlet
+T_init: int = 10  # Température initiale dans le mur (°C)
+T_left: int = 23  # Température à la frontière gauche (°C) - Dirichlet
 T_cible: int = 18 # Température cible pour le mur de droite
 
 # Propriétés des matériaux
@@ -95,7 +95,7 @@ dx_values: np.ndarray[float] = np.array(
 v_values = dx_values * S
 
 # Paramètres temporels
-HEURES: int = 96  # Durée de la simulation (heures)
+HEURES: int = 48  # Durée de la simulation (heures)
 t_total: int = 3600 * HEURES  # Simulation sur X heures
 dt: int = 1800  # Intervalle de temps en secondes
 
@@ -190,7 +190,7 @@ for _ in range(0, t_total, dt):
 fig, ax = plt.subplots(figsize=(10,10))
 line, = ax.plot([], [], "-", color="red", lw=2, label="Température")
 ax.set_xlim(0, L)
-ax.set_ylim(0, 35)
+ax.set_ylim(-5, 35)
 ax.set_xlabel("Position (m)")
 ax.set_ylabel("Température (°C)")
 ax.set_title(f"Évolution de la température dans le mur en fonction du temps \navec un élément chauffant de {power_beton_conducteur}W et une temparture cible: {T_cible}°C")

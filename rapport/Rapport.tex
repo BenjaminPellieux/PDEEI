@@ -15,7 +15,7 @@
 
 \geometry{left=2.0cm,right=2.0cm,top=2.5cm,bottom=2.5cm}
 \title{Rapport Jalon 3}
-\author{\textbf{Benjamin PELLIEUX}}
+\author{\textbf{Benjamin PELLIEUX}\\\large{PELB28120100}}
 \date{\today}
 
 \begin{document}
@@ -48,7 +48,7 @@ Le modèle utilise la \textbf{méthode des volumes finis (MVF)} pour discrétise
         \item Béton standard : \(k = 1.5 \, W/m \cdot K\), \(c = 880 \, J/K \cdot kg\), \(p = 2200 \, kg/m^3\).
         \item Air : \(k = 0.026 \, W/m \cdot K\), \(c = 1004 \, J/K \cdot kg\), \(p = 1.204 \, kg/m^3\).
     \end{itemize}
-    \item Source de chaleur dans la couche de béton conducteur : \(3000 \, W\) répartis uniformément sur les volumes finis de cette couche.
+    \item Source de chaleur dans la couche de béton conducteur : \(200 \, W\) répartis uniformément sur les volumes finis de cette couche.
 \end{itemize}
 
 La résolution du système est effectuée avec une matrice pleine calculée à chaque itération, tenant compte des propriétés thermiques des différents matériaux et de la position de la source de chaleur.
@@ -56,38 +56,89 @@ La résolution du système est effectuée avec une matrice pleine calculée à c
 
 \section{Résultats}
 
-La simulation produit une \textbf{animation} illustrant l'évolution de la température à l'intérieur d'un mur multicouche. Cette visualisation met en avant l'effet de la couche chauffante intégrée et la manière dont la chaleur se propage dans les différentes couches du mur en fonction du temps. Un exemple d'image extraite de l'animation est présenté ci-dessous.
+La simulation a été réalisée pour trois scénarios distincts en termes de durées et de conditions aux limites :
 
+\begin{itemize}
+    \item \textbf{Simulation 24H :} Température gauche (\(T_{\text{left}} = 15^\circ\mathrm{C}\)), puissance de la source (\(P = 200\,\mathrm{W}\)) et température cible (\(T_{\text{target}} = 18^\circ\mathrm{C}\)).
+    \item \textbf{Simulation 48H :} Température initiale du mur (\(T_{\text{init}} = 10^\circ\mathrm{C}\)), température gauche plus élevée (\(T_{\text{left}} = 23^\circ\mathrm{C}\)), même puissance et température cible (\(P = 200\,\mathrm{W}\), \(T_{\text{target}} = 18^\circ\mathrm{C}\)).
+    \item \textbf{Simulation 96H :} Température gauche plus basse (\(T_{\text{left}} = -10^\circ\mathrm{C}\)), même puissance et température cible (\(P = 200\,\mathrm{W}\), \(T_{\text{target}} = 18^\circ\mathrm{C}\)).
+\end{itemize}
+
+Ces simulations produisent des \textbf{animations} montrant l'évolution de la température dans le mur en fonction de la position et du temps.
+
+\subsection{Animations et comportement observé}
 
 \begin{figure}[htbp]
     \centering
-    \animategraphics[autoplay,loop,width=1\textwidth]{5}{ani/Simulation_Jalon3-}{0}{95}
-    \caption{Animation de Simulation Jalon3}
-    \label{fig:simulation_jalon3}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \animategraphics[autoplay,loop,width=\textwidth]{5}{ani/Simulation_Jalon3_24H-}{0}{47}
+        \caption{Évolution de la température sur 24 heures (\(T_{\text{left}} = 15^\circ\mathrm{C}\)).}
+        \label{fig:simulation_jalon3_24h}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \animategraphics[autoplay,loop,width=\textwidth]{5}{ani/Simulation_Jalon3_48H-}{0}{95}
+        \caption{Évolution de la température sur 48 heures (\(T_{\text{left}} = 23^\circ\mathrm{C}\)).}
+        \label{fig:simulation_jalon3_48h}
+    \end{subfigure}
+    \caption{Comparaison de l'évolution de la température sur 24 heures et 48 heures.}
+    \label{fig:simulation_comparison}
+\end{figure}
+\newpage
+
+\begin{figure}[htp]
+    \centering
+    \animategraphics[autoplay,loop,width=0.8\textwidth]{5}{ani/Simulation_Jalon3_96H-}{0}{191}
+    \caption{Évolution de la température sur 96 heures (\(T_{\text{left}} = -10^\circ\mathrm{C}\)).}
+    \label{fig:simulation_jalon3_96h}
 \end{figure}
 
-L'animation permet de visualiser les mécanismes thermiques et met en évidence les observations suivantes :
+\subsection{Analyse des résultats}
+
+Les simulations révèlent des dynamiques thermiques variées en fonction des paramètres de simulation :
+
+\paragraph{Simulation 24H :}
 \begin{itemize}
-    \item \textbf{Diffusion rapide dans la couche chauffante :} La couche chauffante atteint rapidement une température élevée, ce qui engendre une diffusion importante de la chaleur vers les couches adjacentes.
-    \item \textbf{Isolation thermique de la couche d'air :} La couche d'air agit comme une barrière thermique, ralentissant considérablement la propagation de la chaleur entre la première couche de béton et la couche chauffante. Cela illustre l'efficacité de l'air en tant qu'isolant.
-    \item \textbf{Conduction progressive dans la dernière couche de béton :} La dernière couche de béton se réchauffe de manière progressive grâce à la conduction thermique. Toutefois, la condition de flux nul imposée à l'extrémité droite limite la dissipation de chaleur, créant un plateau thermique dans cette région.
-    \item \textbf{Gradient de température aux interfaces :} Les interfaces entre les couches montrent des gradients de température marqués, reflétant les différences de conductivité thermique des matériaux utilisés.
+    \item La source de chaleur (\(P = 200\,\mathrm{W}\)) s'active dès que la température intérieure (côté droit) descend en dessous de \(18^\circ\mathrm{C}\).
+    \item Grâce à une température gauche modérée (\(15^\circ\mathrm{C}\)), la chaleur se diffuse relativement bien dans le mur.
+    \item La température cible est atteinte plusieurs fois, entraînant des cycles d'activation et de désactivation de la source.
 \end{itemize}
 
-Ces résultats confirment que la structure multicouche du mur, combinée à l'intégration d'un élément chauffant, influence directement la répartition de la chaleur et l'efficacité énergétique globale.
+\newpage
+\paragraph{Simulation 48H :}
+\begin{itemize}
+    \item Avec une température gauche plus élevée (\(23^\circ\mathrm{C}\)) et une température initiale du mur plus basse (\(10^\circ\mathrm{C}\)), le gradient de température entre l'intérieur du mur et l'extérieur est réduit.
+    \item La chaleur provenant de la gauche contribue à réchauffer le mur, réduisant la nécessité d'activation de la source de chaleur interne.
+    \item La température cible est atteinte plus rapidement et maintenue plus facilement, ce qui se traduit par une consommation énergétique moindre de la source interne.
+\end{itemize}
+
+\paragraph{Simulation 96H :}
+\begin{itemize}
+    \item La température gauche basse (\(T_{\text{left}} = -10^\circ\mathrm{C}\)) accentue les pertes thermiques vers l'extérieur.
+    \item La source de chaleur est activée plus fréquemment pour compenser ces pertes et maintenir la température cible de \(18^\circ\mathrm{C}\) à l'intérieur.
+    \item Malgré ces conditions défavorables, la gestion dynamique de la source permet de maintenir une température intérieure acceptable sur la durée.
+\end{itemize}
+
+\subsection{Comparaison entre les simulations}
+\begin{itemize}
+    \item La simulation de 48H avec une température gauche plus élevée (\(23^\circ\mathrm{C}\)) montre une meilleure efficacité thermique, avec une réduction du besoin d'activation de la source interne comparée à la simulation de 24H.
+    \item La simulation de 96H met en évidence l'impact significatif des conditions aux limites sur la consommation énergétique et l'efficacité thermique du système.
+    \item Les variations des températures initiales et des températures aux limites affectent directement la dynamique thermique du mur et la gestion de la source de chaleur.
+\end{itemize}
 
 \section{Conclusion}
 
-Le Jalon 3 a permis de démontrer la faisabilité et l'impact de l'intégration d'un élément chauffant dans un mur multicouche. La couche chauffante offre un potentiel significatif pour concentrer la diffusion thermique là où elle est nécessaire, réduisant ainsi la consommation énergétique globale tout en maintenant un confort thermique.
+Les trois simulations réalisées montrent que :
 
-Les observations principales issues de cette simulation incluent :
 \begin{itemize}
-    \item Une diffusion thermique efficace grâce à la couche chauffante.
-    \item Une isolation thermique notable apportée par la couche d'air.
-    \item Une stabilisation thermique dans la dernière couche de béton, influencée par les conditions aux limites.
+    \item Une température gauche plus élevée favorise la diffusion de chaleur dans le mur, réduisant la charge sur la source de chaleur interne pour atteindre la température cible.
+    \item Les conditions aux limites, telles que la température extérieure, ont un impact majeur sur la consommation énergétique et doivent être prises en compte dans la conception thermique des bâtiments.
+    \item La gestion efficace de la source de chaleur en fonction des conditions thermiques permet d'optimiser la consommation d'énergie tout en maintenant le confort thermique souhaité.
 \end{itemize}
 
-Cette simulation ouvre des perspectives pour des systèmes de chauffage optimisés et ciblés dans les bâtiments modernes, permettant une réduction significative des coûts énergétiques tout en répondant aux exigences de confort thermique. Des travaux futurs pourraient explorer l'effet de cycles thermiques et l'optimisation des propriétés de la couche chauffante pour diverses configurations architecturales.
+Ces résultats confirment l'importance de modéliser les systèmes thermiques avec des paramètres réalistes pour concevoir des solutions optimisées énergétiquement et adaptées aux besoins.
 
 Les données et le code source sont disponibles sur le dépôt GitHub : \\ \url{https://github.com/BenjaminPellieux/PDEEI/tree/Jalon3}.
 
