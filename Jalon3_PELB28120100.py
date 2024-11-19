@@ -1,3 +1,23 @@
+"""
+Date: 18/11/2024
+Author: Benjamin PELLIEUX <bpellieux@etu.uqac.ca>
+Status 
+Simulation de la conduction thermique dans un mur multicouche avec une couche chauffante
+
+Ce script modélise la diffusion thermique dans un mur en béton comprenant plusieurs couches,
+avec des propriétés thermiques distinctes pour chaque matériau (béton, air, béton conducteur).
+Une source de chaleur est ajoutée dans une couche de béton conducteur pour simuler un chauffage.
+
+Le script produit une animation montrant l'évolution de la température dans le mur en fonction
+du temps et de la position.
+
+Bibliothèques utilisées :
+- numpy : Calculs numériques et gestion des tableaux
+- matplotlib : Visualisation des données et animation
+- datetime : Gestion du temps pour la simulation
+"""
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
