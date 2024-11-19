@@ -7,6 +7,7 @@ __pycache__/
 *.so
 
 
+rapport/ani/
 data/*
 *.aux
 *.log

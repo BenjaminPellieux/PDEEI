@@ -1,9 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd 
-from mpl_toolkits.mplot3d import Axes3D
-from scipy.sparse import diags
-from scipy.linalg import solve_banded
 from datetime import datetime, timedelta
 from matplotlib.animation import FuncAnimation
 
@@ -11,64 +7,46 @@ from matplotlib.animation import FuncAnimation
 #                Constantes              #
 ##########################################
 
-FPS = 60
-GIF = True
+# Animation
+FPS = 60  # Fréquence d'images par seconde pour l'animation
+GIF = True  # Si True, enregistre l'animation en GIF
 
 ###################################
-#        Donnée du mur            #
+#        Données géométriques     #
 ###################################
 
-L = 0.30  # longeur Dimension = du mur (m)
-l = 3  # Largeur 
-h = 2 # Hauteur
-S = h * l  # Surface
-# 1/6 beton // 1/6 air // 4/6 beton
+L = 0.30  # Longueur du mur (m)
+l = 3  # Largeur du mur (m)
+h = 2  # Hauteur du mur (m)
+S = h * l  # Surface du mur (m²)
 
 ###################################
-#       Donnée des temperatures   #
+#       Données thermiques        #
 ###################################
 
-T_init = 12
+# Températures initiales et limites
+T_init = 12  # Température initiale dans le mur (°C)
 T_left = 25  # Température à la frontière gauche (°C) - Dirichlet
+T_cible = 18 # Température cible pour le mur de droite
 
-###################################
-#       Donnée du Béton           #
-###################################
-
-NVF_beton1 = 200
-NVF_beton2 = 1000 #Nombre de Volumes Finis
-k_beton = 1.5  # Conductivité thermique du béton (W/m·K)
-p_beton = 2200  # kg/m3
-c_beton = 880  # Capacitée thermique du beton (J/K·kg)
-
-###################################
-#   Donnée Element chauffant      #
-###################################
-
-power_beton_conducteur = 3000
-NVF_beton_conducteur = 10
-
-###################################
-#       Donnée de l'air           #
-###################################
-
-NVF_air = 500
-h_air = 20 # Convection normal de l'aire  
-k_air = 0.026  # Conductivité thermique de l'air (W/m·K)
-p_air = 1.204   # kg/m3
-c_air = 1004  # Capacitée thermique de l'air (J/K·kg)
+# Propriétés des matériaux
+k_beton, c_beton, p_beton = 1.5, 880, 2200  # Béton standard
+k_air, c_air, p_air, h_air= 0.026, 1004, 1.204, 20  # Air
+power_beton_conducteur = 3000  # Puissance thermique dans la couche chauffante (W)
 
 ###################################
 #     Parametre de Simulation     #
 ###################################
 
-# 1/6 beton // 1/6 air // 1/20 beton conducteur et le reste de beton +- 4/6
-T_cible = 18
+# Distribution des couches dans le mur:  1/6 beton // 1/6 air // 1/20 beton conducteur et le reste de beton +- 4/6
+NVF_beton1, NVF_air, NVF_beton_conducteur, NVF_beton2 = 200, 500, 10, 1000  # Nombre de volumes finis
+
 NVF_tot = NVF_beton1 + NVF_air + NVF_beton_conducteur + NVF_beton2 
 comp_mur = [round(NVF_tot / 6), round(NVF_tot / 6), round(NVF_tot / 20)]
 NVF_beton2 = NVF_tot - sum(comp_mur)
 comp_mur.append(NVF_beton2)
  
+# Propriétés thermiques par couche
 k_values = np.array([k_beton] * comp_mur[0] + 
                     [k_air]   * comp_mur[1] + 
                     [k_beton] * comp_mur[2] + 
@@ -84,6 +62,7 @@ p_values = np.array([p_beton] * comp_mur[0] +
                     [p_beton] * comp_mur[2] + 
                     [p_beton] * comp_mur[3])
 
+# Dimensions des volumes finis
 dx_values = np.array([L / (6 * NVF_beton1)] * comp_mur[0] + 
                      [L / (6 * NVF_air)] * comp_mur[1] + 
                      [L / (20 * NVF_beton_conducteur)] * comp_mur[2] + 
@@ -91,7 +70,8 @@ dx_values = np.array([L / (6 * NVF_beton1)] * comp_mur[0] +
                      ) 
 v_values = dx_values * S
 
-heures = 48
+# Paramètres temporels
+heures = 48  # Durée de la simulation (heures)
 t_total = 3600 * heures  # Simulation sur X heures
 dt = 1800  # Intervalle de temps en secondes (30 minutes)
 
@@ -108,10 +88,14 @@ all_temperatures = []
 ##########################################
 
 def solve_mixte_neumann() -> np.ndarray:
-    """ Résolution du problème avec conditions mixte & Neumann """
+    """
+    Résolution du problème avec conditions aux limites mixtes (Dirichlet-Neumann).
+    Retourne la nouvelle distribution de température dans le mur.
+    """
     
     A, B = np.zeros((NVF_tot, NVF_tot)), np.copy(T_old)
 
+    # Construction de la matrice et du vecteur B
     for i in range(1, NVF_tot - 1):
 
         k_eff_lower = (((dx_values[i] * k_values[i] + dx_values[i - 1] * k_values[i - 1]) * S) / (dx_values[i] + dx_values[i - 1])) /  ((dx_values[i] + dx_values[i - 1]) / 2)
@@ -123,6 +107,7 @@ def solve_mixte_neumann() -> np.ndarray:
         if float(T_old[-1]) < T_cible:
             B[i] += src[i] * ((c_values[i] * p_values[i] * v_values[i]) / dt)
 
+    # Conditions aux limites
     k_eff_upper = (((dx_values[0] * k_values[0] + dx_values[1] * k_values[1]) * S) / (dx_values[0] + dx_values[1])) /  ((dx_values[0] + dx_values[1]) / 2)
     A[0, 1] = -k_eff_upper
     A[0, 0], B[0] = h_air * S +  k_eff_upper + ((c_values[0] * p_values[0] * v_values[0]) / dt), h_air * S  * T_left + T_old[0]  

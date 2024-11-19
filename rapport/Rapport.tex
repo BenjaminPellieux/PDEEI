@@ -1,139 +1,119 @@
 \documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{expl3}
+\usepackage{xparse}
+\usepackage{animate}
 \usepackage{graphicx}
+\usepackage{animate}
 \usepackage{amsmath}
 \usepackage{hyperref}
 \usepackage{geometry}
 \usepackage{subcaption}
-\usepackage[francais]{babel}
+\usepackage[french]{babel}
+
+
 \geometry{left=2.0cm,right=2.0cm,top=2.5cm,bottom=2.5cm}
-% \captionsetup{compatibility=true}
-\title{Rapport Jalon 2}
+\title{Rapport Jalon 3}
 \author{\textbf{Benjamin PELLIEUX}}
 \date{\today}
 
 \begin{document}
 
 \maketitle
-\section{Jalon 2 : Simulation de la conduction thermique en régime transitoire}
+\large{\textbf{Jalon 3 : Simulation de la conduction thermique avec un chauffage intégré}}
 
-\subsection{Problématique générale}
-La problématique reste identique à celle présentée pour le Jalon 1. Il s'agit de comprendre la diffusion de la chaleur à travers un mur en béton, en modélisant la conduction thermique. L'objectif global est de réduire les coûts de chauffage tout en assurant un confort thermique optimal pour les occupants du bâtiment.
+\section{Problématique générale}
+Le Jalon 3 vise à améliorer la modélisation thermique du mur étudié en introduisant un élément chauffant. Cette simulation prend en compte une couche de béton conducteur à l'intérieur du mur, alimentée par une source de chaleur, afin de mieux comprendre l'impact d'une telle configuration sur la dissipation de chaleur. L'objectif principal reste de réduire les coûts énergétiques tout en maintenant un confort thermique optimal.
 
-\subsection{Objectifs du Jalon 2}
-L'objectif de ce jalon est de modéliser la conduction thermique en \textbf{régime transitoire} dans un mur en béton, en tenant compte de l'évolution de la température au fil du temps. Contrairement au Jalon 1 qui se concentrait sur le régime stationnaire, ce jalon vise à observer l'évolution de la température sur une période de 96 heures. Deux scénarios de conditions aux limites sont simulés :
+\section{Objectifs du Jalon 3}
+L'objectif de ce jalon est de simuler la diffusion de la chaleur dans un mur en béton multicouche comprenant :
 \begin{itemize}
-    \item \textbf{Dirichlet-Dirichlet} : Températures imposées aux deux extrémités du mur.
-    \item \textbf{Dirichlet-Neumann} : Température imposée à une extrémité et flux thermique nul à l'autre.
+    \item Une couche de béton standard (1/6 du mur total).
+    \item Une couche d'air isolant (1/6 du mur total).
+    \item Une couche de béton conducteur (1/20 du mur total) dotée d'une source de chaleur intégrée.
+    \item Une dernière couche de béton standard (environ 4/6 du mur total).
 \end{itemize}
-Un terme de source de chaleur est ajouté au centre du mur pour simuler un apport thermique supplémentaire.
+La simulation inclut une condition aux limites mixte à gauche (Dirichlet) et un flux nul à droite (Neumann). Elle se concentre sur l'impact de la source de chaleur et sur l'évolution des températures en fonction du temps et de la position.
 
-\subsection{Méthodologie}
-Pour résoudre l'équation de la chaleur en régime transitoire, nous utilisons une approche discrétisée à l'aide de la \textbf{méthode des volumes finis (MVF)}. La discrétisation spatiale est effectuée en découpant le mur en 1000 volumes finis, tandis que la discrétisation temporelle est réalisée avec un pas de temps de 15 minutes (\(dt = 900 \, s\)). La simulation s'étend sur une période de 96 heures (\(t_{\text{total}} = 3600 \times 96 \, s\)).
+\section{Méthodologie}
 
-Les hypothèses principales sont les suivantes :
+Le modèle utilise la \textbf{méthode des volumes finis (MVF)} pour discrétiser l'équation de la chaleur en fonction de l'espace et du temps. Les paramètres et hypothèses principaux sont les suivants :
 \begin{itemize}
-    \item Le mur est modélisé comme un milieu homogène avec une conductivité thermique \(k = 1.5 \, W/m \cdot K\).
-    \item Les variations de température au sein du mur sont modélisées en fonction de la position et du temps.
-    \item La chaleur est diffusée à travers le mur, avec une source de chaleur au centre pour simuler un apport énergétique constant.
+    \item Discrétisation spatiale avec un total de \(N = 2000\) volumes finis, dont \(10\) pour la couche chauffante.
+    \item Discrétisation temporelle avec un pas de temps \(dt = 1800 \, s\) (30 minutes).
+    \item Simulation sur une durée totale de \(t_{\text{total}} = 3600 \times 48 \, s\) (48 heures).
+    \item Conductivité thermique, capacité thermique et densité adaptées à chaque matériau :
+    \begin{itemize}
+        \item Béton standard : \(k = 1.5 \, W/m \cdot K\), \(c = 880 \, J/K \cdot kg\), \(p = 2200 \, kg/m^3\).
+        \item Air : \(k = 0.026 \, W/m \cdot K\), \(c = 1004 \, J/K \cdot kg\), \(p = 1.204 \, kg/m^3\).
+    \end{itemize}
+    \item Source de chaleur dans la couche de béton conducteur : \(3000 \, W\) répartis uniformément sur les volumes finis de cette couche.
 \end{itemize}
 
-La résolution du système d'équations est effectuée à l'aide de la fonction \texttt{solve\_banded} de \texttt{scipy}, adaptée à la structure tridiagonale de la matrice de coefficients. Les conditions aux limites sont intégrées directement dans la matrice de coefficients avant chaque résolution.
-\subsection{Résultats}
-La simulation produit des graphiques 3D illustrant la \textbf{distribution de la température} dans le mur en fonction de la \textbf{position} et du \textbf{temps}. Les résultats montrent comment la température évolue sur 96 heures et 128 heures, permettant d'observer la propagation de la chaleur dans le mur au fil du temps.
+La résolution du système est effectuée avec une matrice pleine calculée à chaque itération, tenant compte des propriétés thermiques des différents matériaux et de la position de la source de chaleur.
 
-\begin{figure}[!ht]
+
+\section{Résultats}
+
+La simulation produit une \textbf{animation} illustrant l'évolution de la température à l'intérieur d'un mur multicouche. Cette visualisation met en avant l'effet de la couche chauffante intégrée et la manière dont la chaleur se propage dans les différentes couches du mur en fonction du temps. Un exemple d'image extraite de l'animation est présenté ci-dessous.
+
+
+\begin{figure}[htbp]
     \centering
-    \begin{subfigure}{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{img/Figure_DD_3D.png} % Remplacer par le chemin vers votre image
-        \caption{96H, Dirichlet-Dirichlet.}
-        \label{fig:jalon2_dirichlet_dirichlet_96H}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{img/Figure_DD_3D_128.png} % Remplacer par le chemin vers votre image
-        \caption{128H, Dirichlet-Dirichlet.}
-        \label{fig:jalon2_dirichlet_dirichlet_128H}
-    \end{subfigure}
-    \caption{Comparaison de l'évolution de la température dans le mur avec la condition Dirichlet-Dirichlet entre 96H et 128H.}
-    \label{fig:jalon2_comparaison_dirichlet_dirichlet}
+    \animategraphics[autoplay,loop,width=1\textwidth]{5}{ani/Simulation_Jalon3-}{0}{95}
+    \caption{Animation de Simulation Jalon3}
+    \label{fig:simulation_jalon3}
 \end{figure}
 
-\begin{figure}[!ht]
-    \centering
-    \begin{subfigure}{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{img/Figure_DN_3D.png} % Remplacer par le chemin vers votre image
-        \caption{96H, Dirichlet-Neumann.}
-        \label{fig:jalon2_dirichlet_neumann_96H}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.45\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{img/Figure_DN_3D_128.png} % Remplacer par le chemin vers votre image
-        \caption{128H, Dirichlet-Neumann.}
-        \label{fig:jalon2_dirichlet_neumann_128H}
-    \end{subfigure}
-    \caption{Comparaison de l'évolution de la température dans le mur avec la condition Dirichlet-Neumann entre 96H et 128H.}
-    \label{fig:jalon2_comparaison_dirichlet_neumann}
-\end{figure}
-
-\newpage
-\subsection{Analyse des résultats}
-Les graphiques présentés aux figures \ref{fig:jalon2_dirichlet_dirichlet_96H}, \ref{fig:jalon2_dirichlet_dirichlet_128H}, \ref{fig:jalon2_dirichlet_neumann_96H} et \ref{fig:jalon2_dirichlet_neumann_128H} montrent l'évolution de la température dans un mur de béton en fonction de la position et du temps pour deux types de conditions aux limites (Dirichlet-Dirichlet et Dirichlet-Neumann) et pour deux durées de simulation (96 heures et 128 heures).
-
-\subsubsection{Analyse du scénario Dirichlet-Dirichlet}
+L'animation permet de visualiser les mécanismes thermiques et met en évidence les observations suivantes :
 \begin{itemize}
-    \item \textbf{96 heures (Figure \ref{fig:jalon2_dirichlet_dirichlet_96H}) :} La température est initialement plus élevée du côté gauche, où la température est fixée à 100°C, et diminue progressivement vers la droite, où la température est fixée à 25°C. Après 96 heures, la courbe montre que la chaleur continue de se diffuser mais tend à se stabiliser, indiquant que l'équilibre thermique est presque atteint.
-    \item \textbf{128 heures (Figure \ref{fig:jalon2_dirichlet_dirichlet_128H}) :} En prolongeant la simulation à 128 heures, on observe que la température se stabilise davantage, atteignant un état proche de l'équilibre. Le gradient de température devient plus régulier, ce qui montre que le mur a presque atteint un équilibre thermique global entre les deux extrémités.
+    \item \textbf{Diffusion rapide dans la couche chauffante :} La couche chauffante atteint rapidement une température élevée, ce qui engendre une diffusion importante de la chaleur vers les couches adjacentes.
+    \item \textbf{Isolation thermique de la couche d'air :} La couche d'air agit comme une barrière thermique, ralentissant considérablement la propagation de la chaleur entre la première couche de béton et la couche chauffante. Cela illustre l'efficacité de l'air en tant qu'isolant.
+    \item \textbf{Conduction progressive dans la dernière couche de béton :} La dernière couche de béton se réchauffe de manière progressive grâce à la conduction thermique. Toutefois, la condition de flux nul imposée à l'extrémité droite limite la dissipation de chaleur, créant un plateau thermique dans cette région.
+    \item \textbf{Gradient de température aux interfaces :} Les interfaces entre les couches montrent des gradients de température marqués, reflétant les différences de conductivité thermique des matériaux utilisés.
 \end{itemize}
 
-\subsubsection{Analyse du scénario Dirichlet-Neumann}
-\begin{itemize}
-    \item \textbf{96 heures (Figure \ref{fig:jalon2_dirichlet_neumann_96H}) :} La température décroît depuis le côté gauche (100°C) vers l'intérieur du mur, mais le profil de température est moins linéaire en raison de la condition de flux nul à droite. La chaleur se dissipe plus lentement vers l'extrémité droite, ce qui se traduit par un plateau thermique vers la fin de la simulation.
-    \item \textbf{128 heures (Figure \ref{fig:jalon2_dirichlet_neumann_128H}) :} À 128 heures, l'évolution montre que la température a continué à se diffuser, mais le flux nul à droite maintient une température légèrement plus élevée sur cette partie du mur. Le plateau thermique reste visible, indiquant que la dissipation de la chaleur est plus lente à l'extrémité où le flux est nul.
-\end{itemize}
+Ces résultats confirment que la structure multicouche du mur, combinée à l'intégration d'un élément chauffant, influence directement la répartition de la chaleur et l'efficacité énergétique globale.
 
-\subsubsection{Comparaison entre 96H et 128H}
-\begin{itemize}
-    \item En comparant les résultats à 96 heures et 128 heures, on constate que les différences se situent principalement dans la stabilisation des températures. L'augmentation du temps de simulation permet au système de se rapprocher de l'équilibre thermique, en particulier dans le cas Dirichlet-Dirichlet.
-    \item Pour le scénario Dirichlet-Dirichlet, l'allongement de la durée de simulation réduit le gradient thermique entre les extrémités du mur, ce qui indique une diffusion continue de la chaleur vers un état homogène.
-    \item Dans le cas Dirichlet-Neumann, l'effet de la condition de flux nul est plus marqué avec le temps, montrant une tendance à conserver davantage de chaleur sur la partie droite du mur. Cela confirme que le flux nul agit comme une barrière à la dissipation de la chaleur.
-\end{itemize}
-
-\newpage
 \section{Conclusion}
-Les simulations réalisées dans le cadre du Jalon 2 ont permis de modéliser et d'analyser la diffusion de la chaleur à travers un mur en béton en régime transitoire, en prenant en compte différentes conditions aux limites (Dirichlet-Dirichlet et Dirichlet-Neumann) et des durées de simulation prolongées (96 heures et 128 heures). 
 
-Les résultats montrent que le choix des conditions aux limites a un impact significatif sur la manière dont la chaleur se dissipe au fil du temps :
+Le Jalon 3 a permis de démontrer la faisabilité et l'impact de l'intégration d'un élément chauffant dans un mur multicouche. La couche chauffante offre un potentiel significatif pour concentrer la diffusion thermique là où elle est nécessaire, réduisant ainsi la consommation énergétique globale tout en maintenant un confort thermique.
+
+Les observations principales issues de cette simulation incluent :
 \begin{itemize}
-    \item Le scénario \textbf{Dirichlet-Dirichlet} tend vers un équilibre thermique plus rapide, où le gradient de température devient homogène à mesure que le temps de simulation augmente.
-    \item Le scénario \textbf{Dirichlet-Neumann} conserve davantage de chaleur à l'extrémité où le flux est nul, créant un plateau thermique qui persiste même avec une simulation prolongée.
+    \item Une diffusion thermique efficace grâce à la couche chauffante.
+    \item Une isolation thermique notable apportée par la couche d'air.
+    \item Une stabilisation thermique dans la dernière couche de béton, influencée par les conditions aux limites.
 \end{itemize}
 
-La comparaison entre les durées de 96 heures et 128 heures a également mis en lumière l'importance de la durée de simulation pour observer la stabilisation des températures dans le mur. L'allongement de la durée de simulation permet d'approcher plus fidèlement l'état d'équilibre thermique, particulièrement dans le cas des conditions Dirichlet-Dirichlet.
+Cette simulation ouvre des perspectives pour des systèmes de chauffage optimisés et ciblés dans les bâtiments modernes, permettant une réduction significative des coûts énergétiques tout en répondant aux exigences de confort thermique. Des travaux futurs pourraient explorer l'effet de cycles thermiques et l'optimisation des propriétés de la couche chauffante pour diverses configurations architecturales.
 
-Ces analyses soulignent la nécessité de prendre en compte la dynamique temporelle dans la conception de systèmes de gestion thermique. Elles permettent de mieux comprendre le comportement d'un matériau dans des conditions réalistes de chauffage, offrant des perspectives pour l'optimisation de la consommation énergétique dans les bâtiments. Le prochain jalon se concentrera sur l'optimisation des cycles de chauffage pour maximiser l'efficacité énergétique tout en maintenant un confort thermique adapté aux besoins des occupants.
-
-\subsection{Conclusion}
-Les résultats obtenus ont été partagés sur un dépôt GitHub pour permettre la reproductibilité des simulations et le suivi des évolutions du projet. Le code source et les données sont disponibles à l'adresse suivante : \url{https://github.com/BenjaminPellieux/PDEEI/tree/Jalon2}.
-
+Les données et le code source sont disponibles sur le dépôt GitHub : \\ \url{https://github.com/BenjaminPellieux/PDEEI/tree/Jalon3}.
 
 \newpage
 \section*{Bibliographie}
 \begin{thebibliography}{9}
+    \bibitem{numpy}
+    Harris, C. R., Millman, K. J., van der Walt, S. J., et al. (2020). \textit{Array programming with NumPy}. Nature, 585(7825), 357–362. Disponible à : \url{https://numpy.org/}.
+    
+    \bibitem{matplotlib}
+    Hunter, J. D. (2007). \textit{Matplotlib: A 2D Graphics Environment}. Computing in Science \& Engineering, 9(3), 90–95. Disponible à : \url{https://matplotlib.org/}.
+    
+    \bibitem{datetime}
+    Python Software Foundation. \textit{datetime — Basic date and time types}. Documentation Python 3. Disponible à : \url{https://docs.python.org/3/library/datetime.html}.
+    
+    \bibitem{animation}
+    The Matplotlib Development Team. \textit{matplotlib.animation — Matplotlib 3.7.0 documentation}. Disponible à : \url{https://matplotlib.org/stable/api/animation_api.html}.
+    
     \bibitem{conductivite_thermique}
     \textit{Liste de conductivités thermiques}, Wikipédia. Disponible à : \url{https://fr.wikipedia.org/wiki/Liste_de_conductivit%C3%A9s_thermiques}.
     
-    \bibitem{scipy}
-    Virtanen, P., Gommers, R., Oliphant, T. E., et al. (2020). \textit{SciPy 1.0: Fundamental Algorithms for Scientific Computing in Python}. Nature Methods, 17(3), 261–272. Disponible à : \url{https://www.scipy.org/}.
-    
     \bibitem{github}
-    Pellieux, B. (2024). \textit{Projet PDEEI - Jalon 2}. GitHub. Disponible à : \url{https://github.com/BenjaminPellieux/PDEEI/tree/Jalon2}.
+    Pellieux, B. (2024). \textit{Projet PDEEI - Jalon 3}. GitHub. Disponible à : \url{https://github.com/BenjaminPellieux/PDEEI/tree/Jalon3}.
 
     \bibitem{Graphiques}
-    Pellieux, B. (2024). \textit{Projet PDEEI - Graphiques Jalon 2}. GitHub. Disponible à : \url{https://github.com/BenjaminPellieux/PDEEI/tree/Jalon2/rapport/img}.
+    Pellieux, B. (2024). \textit{Projet PDEEI - Simulation Jalon3}. GitHub. Disponible à : \url{https://github.com/BenjaminPellieux/PDEEI/blob/Jalon3/Simulation_Jalon3.gif}.
 \end{thebibliography}
 
 
