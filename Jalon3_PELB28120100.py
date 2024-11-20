@@ -14,13 +14,11 @@ du temps et de la position.
 Bibliothèques utilisées :
 - numpy : Calculs numériques et gestion des tableaux
 - matplotlib : Visualisation des données et animation
-- datetime : Gestion du temps pour la simulation
 """
 
 
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime, timedelta
 from matplotlib.animation import FuncAnimation
 
 ##########################################
@@ -29,7 +27,7 @@ from matplotlib.animation import FuncAnimation
 
 # Animation
 FPS: int = 60  # Fréquence d'images par seconde pour l'animation
-GIF: bool = True  # Si True, enregistre l'animation en GIF
+GIF: bool = False  # Si True, enregistre l'animation en GIF
 
 ###################################
 #        Données géométriques     #
@@ -50,7 +48,7 @@ T_left: int = 23  # Température à la frontière gauche (°C) - Dirichlet
 T_cible: int = 18 # Température cible pour le mur de droite
 
 # Propriétés des matériaux
-k_beton, c_beton, p_beton = 1.5, 880, 2200  # Béton standard
+k_beton, c_beton, p_beton = 1.28, 880, 2200  # Béton standard
 k_air, c_air, p_air, h_air = 0.026, 1004, 1.204, 20  # Air
 power_beton_conducteur: int = 200  # Puissance thermique dans la couche chauffante (W)
 
@@ -61,11 +59,16 @@ power_beton_conducteur: int = 200  # Puissance thermique dans la couche chauffan
 # Distribution des couches dans le mur:  1/6 beton // 1/6 air // 1/20 beton conducteur et le reste de beton +- 4/6
 NVF_beton1, NVF_air, NVF_beton_conducteur, NVF_beton2 = 800, 800, 100, 600  # Nombre de volumes finis
 
+
+print(f"{NVF_beton2=}")
 NVF_tot: int = NVF_beton1 + NVF_air + NVF_beton_conducteur + NVF_beton2 
-comp_mur: list[float] = [round(NVF_tot / 6), round(NVF_tot / 6), round(NVF_tot / 20)]
-NVF_beton2 = NVF_tot - sum(comp_mur)
-comp_mur.append(NVF_beton2)
+comp_mur: list[float] = [round(NVF_tot / 6), round(NVF_tot / 6), round(NVF_tot / 20), round((NVF_tot * 37) /60)]
+comp_mur[-1] += abs(NVF_tot - sum(comp_mur))
+# NVF_beton2 = NVF_tot - sum(comp_mur)
+# comp_mur.append(NVF_beton2)
  
+
+print(f"{comp_mur=}")
 # Propriétés thermiques par couche
 k_values: np.ndarray[float] = np.array(
                     [k_beton] * comp_mur[0] + 
@@ -90,7 +93,7 @@ dx_values: np.ndarray[float] = np.array(
                      [L / (6 * NVF_beton1)] * comp_mur[0] + 
                      [L / (6 * NVF_air)] * comp_mur[1] + 
                      [L / (20 * NVF_beton_conducteur)] * comp_mur[2] + 
-                     [L / NVF_beton2] * comp_mur[3]
+                     [(37 * L) / (60 * NVF_beton2)] * comp_mur[3]
                      ) 
 v_values = dx_values * S
 
