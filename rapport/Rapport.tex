@@ -36,9 +36,17 @@ L'objectif de ce jalon est de simuler la diffusion de la chaleur dans un mur en 
 \end{itemize}
 La simulation inclut une condition aux limites mixte à gauche (Dirichlet) et un flux nul à droite (Neumann). Elle se concentre sur l'impact de la source de chaleur et sur l'évolution des températures en fonction du temps et de la position.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/MurStatus.png}
+    \caption{Représentation de la composition du mur.}
+    \label{fig:compo_mur}
+\end{figure}
+
+\newpage
 \section{Méthodologie}
 
-Le modèle utilise la \textbf{méthode des volumes finis (MVF)} pour discrétiser l'équation de la chaleur en fonction de l'espace et du temps. Les paramètres et hypothèses principaux sont les suivants :
+Le modèle utilise la \textbf{Méthode des Volumes Finis (MVF)} pour discrétiser l'équation de la chaleur en fonction de l'espace et du temps. Les paramètres et hypothèses principaux sont les suivants :
 \begin{itemize}
     \item Discrétisation spatiale avec un total de \(N = 2000\) volumes finis, dont \(10\) pour la couche chauffante.
     \item Discrétisation temporelle avec un pas de temps \(dt = 1800 \, s\) (30 minutes).
@@ -58,15 +66,35 @@ La résolution du système est effectuée avec une matrice pleine calculée à c
 
 La simulation a été réalisée pour trois scénarios distincts en termes de durées et de conditions aux limites :
 
+
 \begin{itemize}
-    \item \textbf{Simulation 24H :} Température gauche (\(T_{\text{left}} = 15^\circ\mathrm{C}\)), puissance de la source (\(P = 200\,\mathrm{W}\)) et température cible (\(T_{\text{target}} = 18^\circ\mathrm{C}\)).
-    \item \textbf{Simulation 48H :} Température initiale du mur (\(T_{\text{init}} = 10^\circ\mathrm{C}\)), température gauche plus élevée (\(T_{\text{left}} = 23^\circ\mathrm{C}\)), même puissance et température cible (\(P = 200\,\mathrm{W}\), \(T_{\text{target}} = 18^\circ\mathrm{C}\)).
-    \item \textbf{Simulation 96H :} Température gauche plus basse (\(T_{\text{left}} = -15^\circ\mathrm{C}\)), même puissance et température cible (\(P = 250\,\mathrm{W}\), \(T_{\text{target}} = 18^\circ\mathrm{C}\)).
+    \item \textbf{Simulation 24H :} 
+    \begin{itemize}
+        \item Température gauche : \(T_{\text{left}} = 15^\circ\mathrm{C}\) ;
+        \item Température initiale dans le mur : \(T_{\text{init}} = 12^\circ\mathrm{C}\) ;
+        \item Puissance de la source : \(P = 200\,\mathrm{W}\) ;
+        \item température cible : \(T_{\text{target}} = 18^\circ\mathrm{C}\).
+    \end{itemize}
+    \item \textbf{Simulation 48H :} 
+    \begin{itemize}
+        \item Température gauche plus élevée : \(T_{\text{left}} = 23^\circ\mathrm{C}\) ;
+        \item Température initiale du mur : (\(T_{\text{init}} = 10^\circ\mathrm{C}\)) ; 
+        \item Puissance de la source : \(P = 200\,\mathrm{W}\) ;
+        \item température cible : \(T_{\text{target}} = 18^\circ\mathrm{C}\).
+    \end{itemize}
+
+    \item \textbf{Simulation 96H :}
+    \begin{itemize}
+        \item Température gauche plus basse : \(T_{\text{left}} = -15^\circ\mathrm{C}\) ;
+        \item Température initiale du mur : \(T_{\text{init}} = 10^\circ\mathrm{C}\) ; 
+        \item Puissance de la source : \(P = 250\,\mathrm{W}\) ;
+        \item température cible :  \(T_{\text{target}} = 18^\circ\mathrm{C}\).
+    \end{itemize}
 \end{itemize}
 
 Ces simulations produisent des \textbf{animations} montrant l'évolution de la température dans le mur en fonction de la position et du temps.
-
-\subsection{Animations et comportement observé}
+\newpage
+\subsection{Animations et comportements observés}
 
 \begin{figure}[htbp]
     \centering
@@ -86,11 +114,10 @@ Ces simulations produisent des \textbf{animations} montrant l'évolution de la t
     \caption{Comparaison de l'évolution de la température sur 24 heures et 48 heures.}
     \label{fig:simulation_comparison}
 \end{figure}
-\newpage
 
-\begin{figure}[htp]
+\begin{figure}[t!]
     \centering
-    \animategraphics[autoplay,loop,width=0.8\textwidth]{5}{ani/Simulation_Jalon3_96H-}{0}{191}
+    \animategraphics[autoplay,loop,width=0.8\textwidth]{10}{ani/Simulation_Jalon3_96H-}{0}{191}
     \caption{Évolution de la température sur 96 heures (\(T_{\text{left}} = -15^\circ\mathrm{C}\)).}
     \label{fig:simulation_jalon3_96h}
 \end{figure}
@@ -106,7 +133,6 @@ Les simulations révèlent des dynamiques thermiques variées en fonction des pa
     \item La température cible n'est pas atteinte en 24H.
 \end{itemize}
 
-\newpage
 \paragraph{Simulation 48H :}
 \begin{itemize}
     \item Avec une température gauche plus élevée (\(23^\circ\mathrm{C}\)) et une température initiale du mur plus basse (\(10^\circ\mathrm{C}\)), le gradient de température entre l'intérieur du mur et l'extérieur est réduit.
@@ -114,6 +140,7 @@ Les simulations révèlent des dynamiques thermiques variées en fonction des pa
     \item La température cible est atteinte plus rapidement et maintenue plus facilement, ce qui se traduit par une consommation énergétique moindre de la source interne.
 \end{itemize}
 
+\newpage
 \paragraph{Simulation 96H :}
 \begin{itemize}
     \item La température gauche basse (\(T_{\text{left}} = -15^\circ\mathrm{C}\)) accentue les pertes thermiques vers l'extérieur.
