@@ -45,7 +45,7 @@ Le modèle utilise la \textbf{méthode des volumes finis (MVF)} pour discrétise
     \item Simulation sur une durée totale de \(t_{\text{total}} = 3600 \times 48 \, s\) (48 heures).
     \item Conductivité thermique, capacité thermique et densité adaptées à chaque matériau :
     \begin{itemize}
-        \item Béton standard : \(k = 1.5 \, W/m \cdot K\), \(c = 880 \, J/K \cdot kg\), \(p = 2200 \, kg/m^3\).
+        \item Béton standard : \(k = 1.28 \, W/m \cdot K\), \(c = 880 \, J/K \cdot kg\), \(p = 2200 \, kg/m^3\).
         \item Air : \(k = 0.026 \, W/m \cdot K\), \(c = 1004 \, J/K \cdot kg\), \(p = 1.204 \, kg/m^3\).
     \end{itemize}
     \item Source de chaleur dans la couche de béton conducteur : \(200 \, W\) répartis uniformément sur les volumes finis de cette couche.
@@ -61,7 +61,7 @@ La simulation a été réalisée pour trois scénarios distincts en termes de du
 \begin{itemize}
     \item \textbf{Simulation 24H :} Température gauche (\(T_{\text{left}} = 15^\circ\mathrm{C}\)), puissance de la source (\(P = 200\,\mathrm{W}\)) et température cible (\(T_{\text{target}} = 18^\circ\mathrm{C}\)).
     \item \textbf{Simulation 48H :} Température initiale du mur (\(T_{\text{init}} = 10^\circ\mathrm{C}\)), température gauche plus élevée (\(T_{\text{left}} = 23^\circ\mathrm{C}\)), même puissance et température cible (\(P = 200\,\mathrm{W}\), \(T_{\text{target}} = 18^\circ\mathrm{C}\)).
-    \item \textbf{Simulation 96H :} Température gauche plus basse (\(T_{\text{left}} = -10^\circ\mathrm{C}\)), même puissance et température cible (\(P = 200\,\mathrm{W}\), \(T_{\text{target}} = 18^\circ\mathrm{C}\)).
+    \item \textbf{Simulation 96H :} Température gauche plus basse (\(T_{\text{left}} = -15^\circ\mathrm{C}\)), même puissance et température cible (\(P = 250\,\mathrm{W}\), \(T_{\text{target}} = 18^\circ\mathrm{C}\)).
 \end{itemize}
 
 Ces simulations produisent des \textbf{animations} montrant l'évolution de la température dans le mur en fonction de la position et du temps.
@@ -91,7 +91,7 @@ Ces simulations produisent des \textbf{animations} montrant l'évolution de la t
 \begin{figure}[htp]
     \centering
     \animategraphics[autoplay,loop,width=0.8\textwidth]{5}{ani/Simulation_Jalon3_96H-}{0}{191}
-    \caption{Évolution de la température sur 96 heures (\(T_{\text{left}} = -10^\circ\mathrm{C}\)).}
+    \caption{Évolution de la température sur 96 heures (\(T_{\text{left}} = -15^\circ\mathrm{C}\)).}
     \label{fig:simulation_jalon3_96h}
 \end{figure}
 
@@ -103,7 +103,7 @@ Les simulations révèlent des dynamiques thermiques variées en fonction des pa
 \begin{itemize}
     \item La source de chaleur (\(P = 200\,\mathrm{W}\)) s'active dès que la température intérieure (côté droit) descend en dessous de \(18^\circ\mathrm{C}\).
     \item Grâce à une température gauche modérée (\(15^\circ\mathrm{C}\)), la chaleur se diffuse relativement bien dans le mur.
-    \item La température cible est atteinte plusieurs fois, entraînant des cycles d'activation et de désactivation de la source.
+    \item La température cible n'est pas atteinte en 24H.
 \end{itemize}
 
 \newpage
@@ -116,8 +116,8 @@ Les simulations révèlent des dynamiques thermiques variées en fonction des pa
 
 \paragraph{Simulation 96H :}
 \begin{itemize}
-    \item La température gauche basse (\(T_{\text{left}} = -10^\circ\mathrm{C}\)) accentue les pertes thermiques vers l'extérieur.
-    \item La source de chaleur est activée plus fréquemment pour compenser ces pertes et maintenir la température cible de \(18^\circ\mathrm{C}\) à l'intérieur.
+    \item La température gauche basse (\(T_{\text{left}} = -15^\circ\mathrm{C}\)) accentue les pertes thermiques vers l'extérieur.
+    \item La source de chaleur  de \(P = 250\,\mathrm{W}\), est activée plus fréquemment pour compenser ces pertes et permet d'atteindre la \(T_{\text{target}} = 18^\circ\mathrm{C}\) à l'intérieur après 77H de simulation.
     \item Malgré ces conditions défavorables, la gestion dynamique de la source permet de maintenir une température intérieure acceptable sur la durée.
 \end{itemize}
 
@@ -150,7 +150,7 @@ Les données et le code source sont disponibles sur le dépôt GitHub : \\ \url{
     
     \bibitem{matplotlib}
     Hunter, J. D. (2007). \textit{Matplotlib: A 2D Graphics Environment}. Computing in Science \& Engineering, 9(3), 90–95. Disponible à : \url{https://matplotlib.org/}.
-    
+
     \bibitem{animation}
     The Matplotlib Development Team. \textit{matplotlib.animation — Matplotlib 3.7.0 documentation}. Disponible à : \url{https://matplotlib.org/stable/api/animation_api.html}.
     
