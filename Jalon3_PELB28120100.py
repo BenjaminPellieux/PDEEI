@@ -57,18 +57,13 @@ power_beton_conducteur: int = 200  # Puissance thermique dans la couche chauffan
 ###################################
 
 # Distribution des couches dans le mur:  1/6 beton // 1/6 air // 1/20 beton conducteur et le reste de beton +- 4/6
-NVF_beton1, NVF_air, NVF_beton_conducteur, NVF_beton2 = 800, 800, 100, 600  # Nombre de volumes finis
+NVF_beton1, NVF_air, NVF_beton_conducteur, NVF_beton2 = 800, 800, 100, 1300  # Nombre de volumes finis
 
-
-print(f"{NVF_beton2=}")
 NVF_tot: int = NVF_beton1 + NVF_air + NVF_beton_conducteur + NVF_beton2 
 comp_mur: list[float] = [round(NVF_tot / 6), round(NVF_tot / 6), round(NVF_tot / 20), round((NVF_tot * 37) /60)]
 comp_mur[-1] += abs(NVF_tot - sum(comp_mur))
-# NVF_beton2 = NVF_tot - sum(comp_mur)
-# comp_mur.append(NVF_beton2)
  
 
-print(f"{comp_mur=}")
 # Propriétés thermiques par couche
 k_values: np.ndarray[float] = np.array(
                     [k_beton] * comp_mur[0] + 
